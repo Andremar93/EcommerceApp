@@ -34,11 +34,12 @@ fun OrdersScreen(navController: NavHostController) {
         navController = navController,
         topBarMessage = "Mis Ordenes",
         showTopBar = true,
-        showBottomBar = false,
+        showBottomBar = true,
         mainContent = {
             LazyColumn(
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .fillMaxWidth().
+                    padding(horizontal = 6.dp)
             ) {
                 items(orders.value) { order ->
                     OrderCard(order)
@@ -56,9 +57,18 @@ fun OrderCard(order: Order) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp),
-        elevation = CardDefaults.cardElevation(4.dp),
-        shape = MaterialTheme.shapes.medium
+            .padding(8.dp)
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.outline,
+                shape = MaterialTheme.shapes.medium
+            ),
+        elevation = CardDefaults.cardElevation(3.dp),
+        shape = MaterialTheme.shapes.medium,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        ),
     ) {
         Column(Modifier.padding(16.dp)) {
             Text(

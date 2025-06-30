@@ -32,7 +32,7 @@ object Routes {
 fun AppNavigation(navController: NavHostController) {
 
 
-    NavHost(navController = navController, startDestination = Routes.PRODUCTS) {
+    NavHost(navController = navController, startDestination = Routes.SPLASH) {
 
         composable(Routes.SPLASH) {
             SplashScreen(navController)

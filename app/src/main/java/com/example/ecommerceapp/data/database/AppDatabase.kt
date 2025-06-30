@@ -14,7 +14,7 @@ import com.example.ecommerceapp.data.database.entities.OrderEntity
 
 @Database(
     entities = [ProductEntity::class, CartEntity::class, OrderEntity::class, OrderItemEntity::class],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 @TypeConverters(Converters::class)

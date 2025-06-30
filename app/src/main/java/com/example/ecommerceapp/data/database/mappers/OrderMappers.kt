@@ -10,7 +10,8 @@ fun OrderItemEntity.toDomain(): OrderItem {
         id = orderItemId,
         productId = productId,
         quantity = quantity,
-        price = price
+        price = price,
+        productName = productName
     )
 }
 
@@ -20,7 +21,8 @@ fun OrderItem.toEntity(orderId: Long): OrderItemEntity {
         orderId = orderId,
         productId = productId,
         quantity = quantity,
-        price = price
+        price = price,
+        productName = productName
     )
 }
 

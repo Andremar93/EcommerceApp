@@ -6,7 +6,8 @@ import androidx.lifecycle.ViewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
-import com.example.ecommerceapp.domain.use_case.LoginUseCase
+import com.example.ecommerceapp.domain.use_case.user.LoginResult
+import com.example.ecommerceapp.domain.use_case.user.LoginUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -58,15 +59,18 @@ class LoginViewModel @Inject constructor(
     fun login(email: String, password: String) {
         viewModelScope.launch {
             loginState = LoginState.Loading
-            val success = loginUseCase(email, password)
-            if (success) {
-                loginState = LoginState.Success
-                isLoggedIn = true
-                errorMessage = null
-            } else {
-                loginState = LoginState.Error("Credenciales inválidas")
-                isLoggedIn = false
-                errorMessage = "Credenciales inválidas"
+            when (val result = loginUseCase(email, password)) {
+                is LoginResult.Success -> {
+                    loginState = LoginState.Success
+                    isLoggedIn = true
+                    errorMessage = null
+                }
+
+                is LoginResult.Error -> {
+                    loginState = LoginState.Error(result.message)
+                    isLoggedIn = false
+                    errorMessage = result.message
+                }
             }
         }
     }

@@ -60,7 +60,7 @@ fun BottomNavBar(
                     if (isCartRoute && cartItemCount > 0) {
                         BadgedBox(
                             badge = {
-                                Badge {
+                                Badge(containerColor = MaterialTheme.colorScheme.onSurfaceVariant) {
                                     Text(
                                         text = cartItemCount.toString(),
                                         style = MaterialTheme.typography.labelSmall

@@ -1,12 +1,9 @@
 package com.example.ecommerceapp.presentation.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.ecommerceapp.presentation.view.viewmodel.CartViewModel
-import com.example.ecommerceapp.presentation.view.viewmodel.UserViewModel
 import com.example.ecommerceapp.presentation.view.views.CartScreen
 import com.example.ecommerceapp.presentation.view.views.LoginScreen
 import com.example.ecommerceapp.presentation.view.views.OrdersScreen

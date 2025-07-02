@@ -18,6 +18,7 @@ val DarkGreen = Color(0xFF547A6A)
 val Yellow = Color(0xFFF7EDE2)
 val YellowLight = Color(0xFFFFFFF2)
 val Dark = Color(0xFF3D405B)
+val Red = Color(0xFFB00020)
 
 val SurfaceVariantLight = Green//Color(0xFFEAE2F2)
 val SurfaceVariantDark = Color(0xFF484459)
@@ -39,7 +40,7 @@ val LightColorScheme = lightColorScheme(
     surfaceVariant = SurfaceVariantLight,
     onSurfaceVariant = DarkGreen,
     outline = OutlineLight,
-    error = DarkGreen,
+    error = Red,
     onError = Color.White,
     inversePrimary = Green,
     inverseSurface = Dark,

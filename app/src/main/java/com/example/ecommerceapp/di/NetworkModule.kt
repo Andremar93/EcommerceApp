@@ -1,8 +1,7 @@
 package com.example.ecommerceapp.di
 
-
 import com.example.ecommerceapp.data.remote.ProductApiService
-import com.example.ecommerceapp.data.user.UserApiService
+import com.example.ecommerceapp.data.remote.UserApiService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -29,13 +28,12 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideProductApiService(retrofit: Retrofit): ProductApiService {
-        return retrofit.create(ProductApiService::class.java)
+    fun provideUserApiService(retrofit: Retrofit): UserApiService{
+        return retrofit.create(UserApiService::class.java)
     }
 
     @Provides
-    @Singleton
-    fun provideUserApiService(retrofit: Retrofit): UserApiService{
-        return retrofit.create(UserApiService::class.java)
+    fun provideProductApiService(retrofit: Retrofit): ProductApiService {
+        return retrofit.create(ProductApiService::class.java)
     }
 }

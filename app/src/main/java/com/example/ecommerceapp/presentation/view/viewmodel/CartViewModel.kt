@@ -5,10 +5,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.ecommerceapp.data.cart.CartDataSource
-import com.example.ecommerceapp.data.database.entities.OrderEntity
-import com.example.ecommerceapp.data.database.entities.OrderItemEntity
-import com.example.ecommerceapp.data.orders.OrdersDataSource
+import com.example.ecommerceapp.domain.repository.CartRepository
+import com.example.ecommerceapp.data.local.entity.OrderEntity
+import com.example.ecommerceapp.data.local.entity.OrderItemEntity
+import com.example.ecommerceapp.domain.repository.OrdersRepository
 import com.example.ecommerceapp.domain.model.Product
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -19,11 +19,11 @@ import kotlinx.coroutines.flow.StateFlow
 
 @HiltViewModel
 class CartViewModel @Inject constructor(
-    private val cartDataSource: CartDataSource,
-    private val ordersDataSource: OrdersDataSource
+    private val cartRepository: CartRepository,
+    private val ordersRepository: OrdersRepository
 ) : ViewModel() {
 
-    val cartItems = cartDataSource.cartItems
+    val cartItems = cartRepository.cartItems
 
     private val _cartItemCount = MutableStateFlow(0)
     val cartItemCount: StateFlow<Int> = _cartItemCount
@@ -48,20 +48,20 @@ class CartViewModel @Inject constructor(
 
     fun increaseQuantity(product: Product) {
         val current = cartItems.value.find { it.product.id == product.id }?.quantity ?: 0
-        cartDataSource.updateQuantity(product, current + 1)
+        cartRepository.updateQuantity(product, current + 1)
     }
 
     fun decreaseQuantity(product: Product) {
         val current = cartItems.value.find { it.product.id == product.id }?.quantity ?: 0
-        cartDataSource.updateQuantity(product, current - 1)
+        cartRepository.updateQuantity(product, current - 1)
     }
 
     fun removeFromCart(product: Product) {
-        cartDataSource.removeFromCart(product)
+        cartRepository.removeFromCart(product)
     }
 
     fun clearCart() {
-        cartDataSource.clearCart()
+        cartRepository.clearCart()
     }
 
     fun finalizeOrder() {
@@ -85,7 +85,7 @@ class CartViewModel @Inject constructor(
                 )
             }
 
-            ordersDataSource.createOrder(order, orderItems)
+            ordersRepository.createOrder(order, orderItems)
             clearCart()
             checkoutSuccess = true
         }

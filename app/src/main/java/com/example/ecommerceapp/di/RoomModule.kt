@@ -2,11 +2,12 @@ package com.example.ecommerceapp.di
 
 import android.content.Context
 import androidx.room.Room
-import com.example.ecommerceapp.data.database.AppDatabase
-import com.example.ecommerceapp.data.database.dao.CartDao
-import com.example.ecommerceapp.data.database.dao.OrderDao
-import com.example.ecommerceapp.data.database.dao.OrderItemDao
-import com.example.ecommerceapp.data.database.dao.ProductDao
+import com.example.ecommerceapp.data.local.AppDatabase
+import com.example.ecommerceapp.data.local.dao.CartDao
+import com.example.ecommerceapp.data.local.dao.OrderDao
+import com.example.ecommerceapp.data.local.dao.OrderItemDao
+import com.example.ecommerceapp.data.local.dao.ProductDao
+import com.example.ecommerceapp.data.local.dao.UsersDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -20,7 +21,6 @@ object RoomModule {
 
     private const val APP_DATABASE_NAME = "product_database"
 
-
     @Singleton
     @Provides
     fun provideRoom(@ApplicationContext context: Context) =
@@ -29,7 +29,7 @@ object RoomModule {
 
     @Singleton
     @Provides
-    fun provideProducts(db: AppDatabase): ProductDao = db.getProductDao()
+    fun provideProductDao(db: AppDatabase): ProductDao = db.getProductDao()
 
     @Provides
     @Singleton
@@ -42,5 +42,8 @@ object RoomModule {
     @Provides
     @Singleton
     fun provideOrderItemDao(db: AppDatabase): OrderItemDao = db.getOrderItemDao()
+
+    @Provides
+    fun provideUserDao(db: AppDatabase): UsersDao = db.getUserDao()
 
 }

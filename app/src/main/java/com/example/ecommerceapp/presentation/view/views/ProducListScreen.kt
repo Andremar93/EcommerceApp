@@ -1,8 +1,10 @@
 package com.example.ecommerceapp.presentation.view.views
 
 import android.widget.Toast
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -10,6 +12,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -29,6 +34,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.example.ecommerceapp.domain.model.Product
 import com.example.ecommerceapp.presentation.view.components.ProductItem
 import com.example.ecommerceapp.presentation.view.components.layout.MainLayout
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 
 @Composable
 fun ProductListScreen(
@@ -38,29 +45,17 @@ fun ProductListScreen(
     val productViewModel: ProductListViewModel = hiltViewModel()
 
     val products by productViewModel.filteredProducts
-    var searchQuery by remember { mutableStateOf("") }
-    var selectedCategory by remember { mutableStateOf("Todas") }
-    var sortAscending by remember { mutableStateOf(true) }
-
     val productQuantities = productViewModel.productQuantities
-
-    val categories = listOf(
-        "Todas",
-        "Mexicana",
-        "Desayunos",
-        "Americana",
-        "Italiana",
-        "Japonesa",
-        "Plato Principal",
-        "Ensaladas",
-        "Mariscos"
-    )
-
     val lastAddedProduct by productViewModel.lastAddedProduct
-    val context = LocalContext.current
-
     val isLoading by productViewModel.isLoading
-    val rest = products.drop(12)
+    val context = LocalContext.current
+    val addingProductId = productViewModel.addingProductId
+
+    val searchQuery = productViewModel.searchQuery
+    val selectedCategory = productViewModel.selectedCategory
+    var sortAscending by remember { mutableStateOf(productViewModel.currentSortAscending) }
+
+    val categories by productViewModel.allCategories.collectAsState()
 
     LaunchedEffect(lastAddedProduct) {
         lastAddedProduct?.let {
@@ -75,31 +70,29 @@ fun ProductListScreen(
         selectedItem = "products",
         showTopBar = false,
         mainContent = {
-            if (isLoading) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(50.dp),
-                        color = MaterialTheme.colorScheme.primary,
-                        strokeWidth = 4.dp
-                    )
+            when {
+                isLoading -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(50.dp),
+                            color = MaterialTheme.colorScheme.primary,
+                            strokeWidth = 4.dp
+                        )
+                    }
                 }
 
-            } else {
-                LazyColumn {
-                    item {
+                products.isEmpty() -> {
+                    Column(modifier = Modifier.padding(8.dp)) {
                         ProductFilterBar(
                             searchQuery = searchQuery,
                             selectedCategory = selectedCategory,
                             sortAscending = sortAscending,
                             onSearchQueryChange = {
-                                searchQuery = it
+                                productViewModel.searchQuery = it
                                 productViewModel.filter(it)
                             },
                             onCategorySelected = {
-                                selectedCategory = it
+                                productViewModel.selectedCategory = it
                                 productViewModel.filterByCategory(it)
                             },
                             onSortChange = {
@@ -108,7 +101,45 @@ fun ProductListScreen(
                             },
                             categories = categories,
                         )
-                        ProductListContent(
+
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                "No se encontraron productos",
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+
+                        }
+                    }
+                }
+
+                else -> {
+                    Column(modifier = Modifier.padding(8.dp)) {
+                        ProductFilterBar(
+                            searchQuery = searchQuery,
+                            selectedCategory = selectedCategory,
+                            sortAscending = sortAscending,
+                            onSearchQueryChange = {
+                                productViewModel.searchQuery = it
+                                productViewModel.filter(it)
+                            },
+                            onCategorySelected = {
+                                productViewModel.selectedCategory = it
+                                productViewModel.filterByCategory(it)
+                            },
+                            onSortChange = {
+                                sortAscending = it
+                                productViewModel.sortByPrice(it)
+                            },
+                            categories = categories,
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        ProductGridContent(
                             products = products,
                             productQuantities = productQuantities,
                             onIncrease = productViewModel::increaseQuantity,
@@ -117,35 +148,49 @@ fun ProductListScreen(
                                 val quantity = productQuantities[product.id] ?: 1
                                 productViewModel.addToCart(product, quantity)
                             },
-                            isAdding = productViewModel.isAddingToCart.value
-                        )
-
-                        //Esta sección no deberia ser construida de esta manera es solo para ejemplificar
-                        // otras secciones en esta screen
-                        Text(
-                            text = "Cerca de ti",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 30.sp,
-                            modifier = Modifier.padding(top = 12.dp)
-                        )
-                        ProductListContent(
-                            products = rest,
-                            productQuantities = productQuantities,
-                            onIncrease = productViewModel::increaseQuantity,
-                            onDecrease = productViewModel::decreaseQuantity,
-                            onAddToCart = { product ->
-                                val quantity = productQuantities[product.id] ?: 1
-                                productViewModel.addToCart(product, quantity)
-                            },
-                            isAdding = productViewModel.isAddingToCart.value
+                            isAddingProductId = addingProductId
                         )
                     }
                 }
             }
-
         }
     )
 }
+
+
+@Composable
+fun ProductGridContent(
+    products: List<Product>,
+    productQuantities: Map<String, Int>,
+    onIncrease: (String) -> Unit,
+    onDecrease: (String) -> Unit,
+    onAddToCart: (Product) -> Unit,
+    isAddingProductId: String?
+) {
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(6.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(
+            items = products,
+            key = { it.id }
+        ) { product ->
+            val quantity = productQuantities[product.id] ?: 1
+            ProductItem(
+                product = product,
+                onIncrease = { onIncrease(product.id) },
+                onDecrease = { onDecrease(product.id) },
+                onAddToCart = { onAddToCart(product) },
+                quantity = quantity,
+                isBeingAdded = product.id == isAddingProductId
+            )
+        }
+    }
+}
+
 
 @Composable
 fun ProductListContent(
@@ -154,7 +199,7 @@ fun ProductListContent(
     onIncrease: (String) -> Unit,
     onDecrease: (String) -> Unit,
     onAddToCart: (Product) -> Unit,
-    isAdding: Boolean
+    isAddingProductId: String?
 ) {
     Column(modifier = Modifier.padding(4.dp)) {
         LazyRow {
@@ -166,13 +211,14 @@ fun ProductListContent(
                     onDecrease = { onDecrease(product.id) },
                     onAddToCart = { onAddToCart(product) },
                     quantity = quantity,
-                    isAdding = isAdding
+                    isBeingAdded = product.id == isAddingProductId
                 )
                 Spacer(modifier = Modifier.height(8.dp))
             }
         }
     }
 }
+
 
 @Preview(showBackground = true)
 @Composable
@@ -195,7 +241,7 @@ fun ProductListContentPreview() {
         onIncrease = {},
         onDecrease = {},
         onAddToCart = {},
-        isAdding = false
+        isAddingProductId = ""
     )
 
 

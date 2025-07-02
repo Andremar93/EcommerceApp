@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -133,10 +134,23 @@ fun LoginScreen(
             Text("¿No tienes cuenta? Registrarme")
         }
 
-        viewModel.errorMessage?.let {
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(text = it, color = MaterialTheme.colorScheme.error)
+        val state = viewModel.loginState
+
+        when (state) {
+            is LoginViewModel.LoginState.Loading -> CircularProgressIndicator()
+            is LoginViewModel.LoginState.Error -> Text(
+                state.message,
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            is LoginViewModel.LoginState.Success -> Text(
+                "¡Login exitoso!",
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            else -> {}
         }
+
     }
 
 }

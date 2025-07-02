@@ -8,29 +8,43 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.ecommerceapp.data.cart.CartDataSource
-import com.example.ecommerceapp.data.products.ProductsDataSource
+import com.example.ecommerceapp.domain.repository.CartRepository
+import com.example.ecommerceapp.domain.use_case.product.GetProductsFromApiUseCase
+import com.example.ecommerceapp.domain.use_case.product.GetProductsFromLocalUseCase
+import com.example.ecommerceapp.domain.use_case.product.SaveProductsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 @HiltViewModel
 class ProductListViewModel @Inject constructor(
-    private val cartDataSource: CartDataSource,
-    private val productsDataSource: ProductsDataSource
+    private val getProductsFromApi: GetProductsFromApiUseCase,
+    private val getProductsFromLocal: GetProductsFromLocalUseCase,
+    private val saveProducts: SaveProductsUseCase,
+    private val cartRepository: CartRepository
 ) : ViewModel() {
+
+    var searchQuery by mutableStateOf("")
+    var selectedCategory by mutableStateOf("Todas")
+    var sortAscending by mutableStateOf(true)
+
+    private val _allCategories = MutableStateFlow<List<String>>(emptyList())
+    val allCategories: StateFlow<List<String>> = _allCategories
+
+    var addingProductId by mutableStateOf<String?>(null)
 
     private val _filteredProducts = mutableStateOf<List<Product>>(emptyList())
     val filteredProducts: State<List<Product>> = _filteredProducts
 
-    private val _isAddingToCart = mutableStateOf(false)
-    val isAddingToCart: State<Boolean> = _isAddingToCart
-
     private var allProducts: List<Product> = emptyList()
     private var currentQuery = ""
     private var currentCategory: String? = null
-    private var currentSortAscending = true
+    var currentSortAscending = true
 
     private val _productQuantities: SnapshotStateMap<String, Int> = mutableStateMapOf()
     val productQuantities: Map<String, Int> get() = _productQuantities
@@ -48,17 +62,18 @@ class ProductListViewModel @Inject constructor(
     private fun loadProducts() {
         _isLoading.value = true
         viewModelScope.launch {
-            launch {
-                productsDataSource.observeCachedProducts().collect { localProducts ->
-                    allProducts = localProducts
-                    applyFilters()
-                    _isLoading.value = false
-                }
-            }
+            allProducts = getProductsFromLocal()
+            _allCategories.value = listOf("Todas") + allProducts.flatMap { it.categories }.distinct()
+            applyFilters()
+            _isLoading.value = false
 
             try {
-                val apiProducts = productsDataSource.getAllProducts()
-                productsDataSource.cacheProducts(apiProducts)
+                val remoteProducts = getProductsFromApi()
+                Log.d("API", "Productos desde API: ${remoteProducts.size}")
+                saveProducts(remoteProducts)
+                allProducts = remoteProducts
+                _allCategories.value = listOf("Todas") + allProducts.flatMap { it.categories }.distinct()
+                applyFilters()
             } catch (e: Exception) {
                 Log.e("ProductListViewModel", "API fetch failed", e)
             }
@@ -68,19 +83,12 @@ class ProductListViewModel @Inject constructor(
 
     fun addToCart(product: Product, quantity: Int) {
         viewModelScope.launch {
-            Log.d("addfromproduct", "$product")
-            _isAddingToCart.value = true
-            delay(150L)
-            if(cartDataSource.addToCart(product, quantity)){
+            addingProductId = product.id
+            delay(300)
+            if (cartRepository.addToCart(product, quantity)) {
                 _lastAddedProduct.value = product
-                _isAddingToCart.value = false
             }
-
         }
-    }
-
-    sealed class NavigationEvent {
-        object NavigateToCart : NavigationEvent()
     }
 
     fun filter(query: String) {

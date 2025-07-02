@@ -20,9 +20,8 @@ Aplicación de ecommerce desarrollada con **Kotlin**, **Jetpack Compose**, **MVV
 - Pagina de perfil de usuario (Se puede modificar, aun no tiene Cloudinary)
 
 ## 🧩 Cosas por mejorar o agregar
-
+- [ ] En la pagina de perfil el usuario esta harcodeado
 - [ ] Validaciones más robustas en formularios (registro y login)
-- [ ] Implementar tests unitarios y de interfaz
 - [ ] Mejorar experiencia de usuario con animaciones (transiciones, feedback visual)
 - [ ] Modo oscuro para toda la app
 - [ ] Agregar soporte offline con Room y sincronización automática

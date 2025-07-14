@@ -6,7 +6,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,7 +15,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
@@ -28,7 +29,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -42,6 +42,9 @@ import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.example.ecommerceapp.presentation.view.components.layout.MainLayout
 import com.example.ecommerceapp.presentation.view.viewmodel.UserViewModel
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.mapSaver
 
 @Composable
 fun UserScreen(
@@ -68,7 +71,7 @@ fun UserScreenContent(
     navController: NavHostController,
 ) {
     val user by userViewModel.user.collectAsState()
-    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+    var selectedImageUri by rememberSaveable { mutableStateOf<Uri?>(null) }
 
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         selectedImageUri = uri
@@ -79,29 +82,28 @@ fun UserScreenContent(
         userViewModel.loadUser()
     }
 
-    Box(
+    val scrollState = rememberScrollState()
+
+    Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .verticalScroll(scrollState)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.align(Alignment.Center)
-        ) {
 
-            UserAvatarEditable(
-                avatarUrl = user.avatar,
-                onImageClick = { launcher.launch("image/*") }
-            )
+        UserAvatarEditable(
+            avatarUrl = user.avatar,
+            onImageClick = { launcher.launch("image/*") }
+        )
 
-            UserProfileFields(user = user, userViewModel = userViewModel)
+        UserProfileFields(user = user, userViewModel = userViewModel)
 
-            PrimaryButton("Mis órdenes") {
-                navController.navigate("orders") {
-                    launchSingleTop = true
-                    restoreState = true
-                }
+        PrimaryButton("Mis órdenes") {
+            navController.navigate("orders") {
+                launchSingleTop = true
+                restoreState = true
             }
         }
     }
@@ -141,14 +143,38 @@ fun UserAvatarEditable(
     }
 }
 
+val UserSaver: Saver<User, *> = mapSaver(
+    save = {
+        mapOf(
+            "name" to it.name,
+            "lastName" to it.lastName,
+            "email" to it.email,
+            "nationality" to it.nationality,
+            "avatar" to it.avatar
+        )
+    },
+    restore = {
+        User(
+            name = it["name"] as String,
+            lastName = it["lastName"] as String,
+            email = it["email"] as String,
+            nationality = it["nationality"] as String,
+            avatar = it["avatar"] as String
+        )
+    }
+)
+
+
 @Composable
 fun UserProfileFields(user: User, userViewModel: UserViewModel) {
     var isEditable by rememberSaveable { mutableStateOf(false) }
 
-    var name by remember(user.name) { mutableStateOf(user.name) }
-    var lastName by remember(user.lastName) { mutableStateOf(user.lastName) }
-    var nationality by remember(user.nationality) { mutableStateOf(user.nationality) }
-    var email by remember(user.email) { mutableStateOf(user.email) }
+    var name by rememberSaveable(user.name) { mutableStateOf(user.name) }
+    var lastName by rememberSaveable(user.lastName) { mutableStateOf(user.lastName) }
+    var nationality by rememberSaveable(user.nationality) { mutableStateOf(user.nationality) }
+    var email by rememberSaveable(user.email) { mutableStateOf(user.email) }
+
+    var originalUser by rememberSaveable(stateSaver = UserSaver) { mutableStateOf(user) }
 
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         ProfileField("Nombre", name, isEditable) { name = it }
@@ -156,9 +182,19 @@ fun UserProfileFields(user: User, userViewModel: UserViewModel) {
         ProfileField("Nacionalidad", nationality, isEditable) { nationality = it }
         ProfileField("Email", email, isEditable) { email = it }
 
+
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             PrimaryButton(if (isEditable) "Cancelar" else "Editar Perfil") {
-                isEditable = !isEditable
+                if (isEditable) {
+                    name = originalUser.name
+                    lastName = originalUser.lastName
+                    nationality = originalUser.nationality
+                    email = originalUser.email
+                    isEditable = false
+                } else {
+                    originalUser = user
+                    isEditable = true
+                }
             }
 
             if (isEditable) {
@@ -166,8 +202,8 @@ fun UserProfileFields(user: User, userViewModel: UserViewModel) {
                     val updatedUser = user.copy(
                         name = name,
                         lastName = lastName,
-                        email = email,
-                        nationality = nationality
+                        nationality = nationality,
+                        email = email
                     )
                     userViewModel.updateUser(updatedUser)
                     isEditable = false

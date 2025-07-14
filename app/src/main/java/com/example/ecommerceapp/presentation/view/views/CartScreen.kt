@@ -44,6 +44,10 @@ fun CartScreen(
 
     var checkoutSuccess = cartViewModel.checkoutSuccess
 
+    LaunchedEffect(Unit) {
+        cartViewModel.loadCart()
+    }
+
     LaunchedEffect(checkoutSuccess) {
         if (checkoutSuccess) {
             onCheckoutSuccess()
@@ -75,16 +79,16 @@ fun CartScreen(
                                 cartItem = cartItem,
                                 onIncrease = {
                                     cartViewModel.increaseQuantity(
-                                        cartItem.product,
+                                        cartItem.productItem,
                                     )
                                 },
                                 onDecrease = {
                                     cartViewModel.decreaseQuantity(
-                                        cartItem.product,
+                                        cartItem.productItem,
                                     )
                                 },
                                 isDeleting = false,
-                                onDeleteProduct = { cartViewModel.removeFromCart(cartItem.product) }
+                                onDeleteProduct = { cartViewModel.removeFromCart(cartItem.productItem) }
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                         }

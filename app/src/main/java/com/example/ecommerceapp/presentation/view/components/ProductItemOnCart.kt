@@ -40,14 +40,15 @@ fun ProductItemOnCart(
         ),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = cartItem.product.name, style = MaterialTheme.typography.titleLarge)
-            Text(text = cartItem.product.description, style = MaterialTheme.typography.bodyMedium)
+
+            Text(text = cartItem.productItem.name, style = MaterialTheme.typography.titleLarge)
+            Text(text = cartItem.productItem.description, style = MaterialTheme.typography.bodyMedium)
             Text(
-                text = "Precio: $${cartItem.product.price}",
+                text = "Precio: $${cartItem.productItem.price}",
                 style = MaterialTheme.typography.bodyMedium
             )
 
-            if (cartItem.product.hasDrink) {
+            if (cartItem.productItem.hasDrink) {
                 Spacer(modifier = Modifier.width(8.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(

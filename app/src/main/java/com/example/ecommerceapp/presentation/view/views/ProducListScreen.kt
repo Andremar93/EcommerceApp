@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -20,9 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.ecommerceapp.presentation.view.components.ProductFilterBar
@@ -31,11 +28,12 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.ecommerceapp.domain.model.Product
+import com.example.ecommerceapp.domain.model.ProductItem
 import com.example.ecommerceapp.presentation.view.components.ProductItem
 import com.example.ecommerceapp.presentation.view.components.layout.MainLayout
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import com.example.ecommerceapp.presentation.view.components.UIState
 
 @Composable
 fun ProductListScreen(
@@ -46,8 +44,9 @@ fun ProductListScreen(
 
     val products by productViewModel.filteredProducts
     val productQuantities = productViewModel.productQuantities
-    val lastAddedProduct by productViewModel.lastAddedProduct
-    val isLoading by productViewModel.isLoading
+    val lastAddedProduct by productViewModel.lastAddedProductItem
+
+    val state = productViewModel.uiState
     val context = LocalContext.current
     val addingProductId = productViewModel.addingProductId
 
@@ -56,6 +55,10 @@ fun ProductListScreen(
     var sortAscending by remember { mutableStateOf(productViewModel.currentSortAscending) }
 
     val categories by productViewModel.allCategories.collectAsState()
+
+    LaunchedEffect(Unit) {
+        productViewModel.loadProducts(refreshData = false)
+    }
 
     LaunchedEffect(lastAddedProduct) {
         lastAddedProduct?.let {
@@ -70,8 +73,8 @@ fun ProductListScreen(
         selectedItem = "products",
         showTopBar = false,
         mainContent = {
-            when {
-                isLoading -> {
+            when (state) {
+                is UIState.Loading -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(50.dp),
@@ -81,74 +84,85 @@ fun ProductListScreen(
                     }
                 }
 
-                products.isEmpty() -> {
-                    Column(modifier = Modifier.padding(8.dp)) {
-                        ProductFilterBar(
-                            searchQuery = searchQuery,
-                            selectedCategory = selectedCategory,
-                            sortAscending = sortAscending,
-                            onSearchQueryChange = {
-                                productViewModel.searchQuery = it
-                                productViewModel.filter(it)
-                            },
-                            onCategorySelected = {
-                                productViewModel.selectedCategory = it
-                                productViewModel.filterByCategory(it)
-                            },
-                            onSortChange = {
-                                sortAscending = it
-                                productViewModel.sortByPrice(it)
-                            },
-                            categories = categories,
-                        )
-
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                "No se encontraron productos",
-                                style = MaterialTheme.typography.bodyLarge
+                is UIState.Success -> {
+                    val products = state.data
+                    if (products.isEmpty()) {
+                        Column(modifier = Modifier.padding(8.dp)) {
+                            ProductFilterBar(
+                                searchQuery = searchQuery,
+                                selectedCategory = selectedCategory,
+                                sortAscending = sortAscending,
+                                onSearchQueryChange = {
+                                    productViewModel.searchQuery = it
+                                    productViewModel.filter(it)
+                                },
+                                onCategorySelected = {
+                                    productViewModel.selectedCategory = it
+                                    productViewModel.filterByCategory(it)
+                                },
+                                onSortChange = {
+                                    sortAscending = it
+                                    productViewModel.sortByPrice(it)
+                                },
+                                categories = categories,
                             )
 
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    "No se encontraron productos",
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
+
+                            }
+                        }
+
+                    } else {
+                        Column(modifier = Modifier.padding(8.dp)) {
+                            ProductFilterBar(
+                                searchQuery = searchQuery,
+                                selectedCategory = selectedCategory,
+                                sortAscending = sortAscending,
+                                onSearchQueryChange = {
+                                    productViewModel.searchQuery = it
+                                    productViewModel.filter(it)
+                                },
+                                onCategorySelected = {
+                                    productViewModel.selectedCategory = it
+                                    productViewModel.filterByCategory(it)
+                                },
+                                onSortChange = {
+                                    sortAscending = it
+                                    productViewModel.sortByPrice(it)
+                                },
+                                categories = categories,
+                            )
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            ProductGridContent(
+                                productItems = products,
+                                productQuantities = productQuantities,
+                                onIncrease = productViewModel::increaseQuantity,
+                                onDecrease = productViewModel::decreaseQuantity,
+                                onAddToCart = { product ->
+                                    val quantity = productQuantities[product.id] ?: 1
+                                    productViewModel.addToCart(product, quantity)
+                                },
+                                isAddingProductId = addingProductId
+                            )
                         }
                     }
                 }
-
-                else -> {
-                    Column(modifier = Modifier.padding(8.dp)) {
-                        ProductFilterBar(
-                            searchQuery = searchQuery,
-                            selectedCategory = selectedCategory,
-                            sortAscending = sortAscending,
-                            onSearchQueryChange = {
-                                productViewModel.searchQuery = it
-                                productViewModel.filter(it)
-                            },
-                            onCategorySelected = {
-                                productViewModel.selectedCategory = it
-                                productViewModel.filterByCategory(it)
-                            },
-                            onSortChange = {
-                                sortAscending = it
-                                productViewModel.sortByPrice(it)
-                            },
-                            categories = categories,
-                        )
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        ProductGridContent(
-                            products = products,
-                            productQuantities = productQuantities,
-                            onIncrease = productViewModel::increaseQuantity,
-                            onDecrease = productViewModel::decreaseQuantity,
-                            onAddToCart = { product ->
-                                val quantity = productQuantities[product.id] ?: 1
-                                productViewModel.addToCart(product, quantity)
-                            },
-                            isAddingProductId = addingProductId
+                is UIState.Error -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(
+                            text = state.message,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.error
                         )
                     }
                 }
@@ -160,11 +174,11 @@ fun ProductListScreen(
 
 @Composable
 fun ProductGridContent(
-    products: List<Product>,
+    productItems: List<ProductItem>,
     productQuantities: Map<String, Int>,
     onIncrease: (String) -> Unit,
     onDecrease: (String) -> Unit,
-    onAddToCart: (Product) -> Unit,
+    onAddToCart: (ProductItem) -> Unit,
     isAddingProductId: String?
 ) {
     LazyVerticalGrid(
@@ -175,12 +189,12 @@ fun ProductGridContent(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(
-            items = products,
+            items = productItems,
             key = { it.id }
         ) { product ->
             val quantity = productQuantities[product.id] ?: 1
             ProductItem(
-                product = product,
+                productItem = product,
                 onIncrease = { onIncrease(product.id) },
                 onDecrease = { onDecrease(product.id) },
                 onAddToCart = { onAddToCart(product) },
@@ -194,19 +208,19 @@ fun ProductGridContent(
 
 @Composable
 fun ProductListContent(
-    products: List<Product>,
+    productItems: List<ProductItem>,
     productQuantities: Map<String, Int>,
     onIncrease: (String) -> Unit,
     onDecrease: (String) -> Unit,
-    onAddToCart: (Product) -> Unit,
+    onAddToCart: (ProductItem) -> Unit,
     isAddingProductId: String?
 ) {
     Column(modifier = Modifier.padding(4.dp)) {
         LazyRow {
-            items(products) { product ->
+            items(productItems) { product ->
                 val quantity = productQuantities[product.id] ?: 1
                 ProductItem(
-                    product = product,
+                    productItem = product,
                     onIncrease = { onIncrease(product.id) },
                     onDecrease = { onDecrease(product.id) },
                     onAddToCart = { onAddToCart(product) },
@@ -223,7 +237,7 @@ fun ProductListContent(
 @Preview(showBackground = true)
 @Composable
 fun ProductListContentPreview() {
-    val sampleProduct = Product(
+    val sampleProductItem = ProductItem(
         id = "1",
         name = "Producto Demo",
         description = "Descripción de prueba",
@@ -233,10 +247,10 @@ fun ProductListContentPreview() {
         hasDrink = false,
     )
 
-    val sampleQuantities = mapOf(sampleProduct.id to 2)
+    val sampleQuantities = mapOf(sampleProductItem.id to 2)
 
     ProductListContent(
-        products = listOf(sampleProduct, sampleProduct),
+        productItems = listOf(sampleProductItem, sampleProductItem),
         productQuantities = sampleQuantities,
         onIncrease = {},
         onDecrease = {},

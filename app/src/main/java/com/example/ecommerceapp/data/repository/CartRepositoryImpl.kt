@@ -6,7 +6,7 @@ import com.example.ecommerceapp.data.local.dao.ProductDao
 import com.example.ecommerceapp.data.local.mappers.toDomain
 import com.example.ecommerceapp.data.local.mappers.toEntity
 import com.example.ecommerceapp.domain.model.CartItem
-import com.example.ecommerceapp.domain.model.Product
+import com.example.ecommerceapp.domain.model.ProductItem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
@@ -36,26 +36,26 @@ class CartRepositoryImpl(
 
     override val cartItems: StateFlow<List<CartItem>> get() = _cartItems
 
-    override fun updateQuantity(product: Product, quantity: Int) {
+    override fun updateQuantity(productItem: ProductItem, quantity: Int) {
         scope.launch {
-            Log.d("UPDATE", "PRODUCT: $product, $quantity")
-            val exists = cartDao.getCartItemByProductId(product.id)
+            Log.d("UPDATE", "PRODUCT: $productItem, $quantity")
+            val exists = cartDao.getCartItemByProductId(productItem.id)
             if (quantity > 0) {
                 if (exists != null) {
                     val updated = exists.copy(quantity = quantity)
                     cartDao.updateCartItem(updated)
                 } else {
-                    cartDao.insertCartItem(CartItem(product, quantity).toEntity())
+                    cartDao.insertCartItem(CartItem(productItem, quantity).toEntity())
                 }
             } else {
-                cartDao.deleteByProductId(product.id)
+                cartDao.deleteByProductId(productItem.id)
             }
         }
     }
 
-    override fun removeFromCart(product: Product) {
+    override fun removeFromCart(productItem: ProductItem) {
         scope.launch {
-            cartDao.deleteByProductId(product.id)
+            cartDao.deleteByProductId(productItem.id)
         }
     }
 
@@ -65,9 +65,9 @@ class CartRepositoryImpl(
         }
     }
 
-    override fun addToCart(product: Product, quantity: Int): Boolean {
+    override fun addToCart(productItem: ProductItem, quantity: Int): Boolean {
         scope.launch {
-            cartDao.insertCartItem(CartItem(product, quantity).toEntity())
+            cartDao.insertCartItem(CartItem(productItem, quantity).toEntity())
         }
         return true
     }

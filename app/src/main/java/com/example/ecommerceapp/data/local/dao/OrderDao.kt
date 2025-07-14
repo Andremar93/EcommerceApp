@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.Flow
 interface OrderDao {
 
     @Insert(onConflict = OnConflictStrategy.Companion.REPLACE)
-    suspend fun insertOrder(order: OrderEntity): Long
+    suspend fun insertOrder(order: OrderEntity)
 
     @Update
     suspend fun updateOrder(order: OrderEntity)
@@ -24,7 +24,7 @@ interface OrderDao {
     suspend fun deleteOrder(order: OrderEntity)
 
     @Query("DELETE FROM orders WHERE id = :orderId")
-    suspend fun deleteByOrderId(orderId: Long)
+    suspend fun deleteByOrderId(orderId: String)
 
     @Query("SELECT * FROM orders ORDER BY orderDate DESC")
     fun getAllOrders(): Flow<List<OrderEntity>>
@@ -35,5 +35,5 @@ interface OrderDao {
 
     @Transaction
     @Query("SELECT * FROM orders WHERE id = :orderId LIMIT 1")
-    suspend fun getOrderWithItemsById(orderId: Long): OrderWithItems?
+    suspend fun getOrderWithItemsById(orderId: String): OrderWithItems?
 }

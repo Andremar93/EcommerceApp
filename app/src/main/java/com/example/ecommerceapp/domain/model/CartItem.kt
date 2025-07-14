@@ -1,6 +1,6 @@
 package com.example.ecommerceapp.domain.model
 
 data class CartItem(
-    val product: Product,
+    val productItem: ProductItem,
     var quantity: Int = 1
 )

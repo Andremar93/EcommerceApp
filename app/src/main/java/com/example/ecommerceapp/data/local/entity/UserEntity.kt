@@ -12,6 +12,7 @@ data class UserEntity(
     val email: String = "",
     val nationality: String = "",
     val avatar: String = "",
-    val password: String = ""
+    val password: String = "",
+    val isLoggedIn: Boolean = false
 )
 

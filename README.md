@@ -66,7 +66,7 @@ Próximamente...
 ┃ ┣ 📂database
 ┃ ┣ 📂fakeRepositories (se uso cuando no habia backend)
 ┃ ┣ 📂orders
-┃ ┣ 📂products
+┃ ┣ 📂productItems
 ┃ ┣ 📂remote
 ┃ ┗ 📂users
 ┣ 📂di

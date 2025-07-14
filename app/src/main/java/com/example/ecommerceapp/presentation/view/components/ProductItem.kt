@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.ecommerceapp.R
-import com.example.ecommerceapp.domain.model.Product
+import com.example.ecommerceapp.domain.model.ProductItem
 import androidx.compose.ui.graphics.graphicsLayer
 
 @Composable
@@ -73,7 +73,7 @@ fun AddToCartButton(
 
 @Composable
 fun ProductItem(
-    product: Product,
+    productItem: ProductItem,
     quantity: Int,
     onIncrease: () -> Unit,
     onDecrease: () -> Unit,
@@ -99,12 +99,12 @@ fun ProductItem(
         ) {
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
-                    .data(product.imageUrl)
+                    .data(productItem.imageUrl)
                     .crossfade(true)
                     .build(),
                 placeholder = painterResource(id = R.drawable.ic_placeholder),
                 error = painterResource(id = R.drawable.ic_placeholder),
-                contentDescription = product.name,
+                contentDescription = productItem.name,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -115,7 +115,7 @@ fun ProductItem(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = product.name,
+                text = productItem.name,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 maxLines = 2
@@ -124,7 +124,7 @@ fun ProductItem(
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = "Precio: $${product.price}",
+                text = "Precio: $${productItem.price}",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold
@@ -133,13 +133,13 @@ fun ProductItem(
             Spacer(modifier = Modifier.height(6.dp))
 
             Text(
-                text = product.description,
+                text = productItem.description,
                 style = MaterialTheme.typography.bodySmall,
                 maxLines = 2,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
-            if (product.hasDrink) {
+            if (productItem.hasDrink) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
@@ -216,7 +216,7 @@ fun ProductItem(
 @Composable
 fun ProductItemPreview() {
     ProductItem(
-        product = Product(
+        productItem = ProductItem(
             id = "1",
             name = "Auriculares Bluetooth",
             description = "Inalámbricos con cancelación de ruido",

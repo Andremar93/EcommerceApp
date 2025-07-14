@@ -1,13 +1,40 @@
 package com.example.ecommerceapp.data.local.mappers
 
 import com.example.ecommerceapp.data.local.entity.ProductEntity
-import com.example.ecommerceapp.domain.model.Product
+import com.example.ecommerceapp.data.model.ProductDto
+import com.example.ecommerceapp.domain.model.ProductItem
 
-fun ProductEntity.toDomain(): Product {
-    return Product(id, name, description, price, hasDrink, imageUrl, categories)
+fun ProductEntity.toDomain(): ProductItem {
+    return ProductItem(id, name, description, price, hasDrink, imageUrl, categories)
 }
 
-fun Product.toEntity(): ProductEntity {
+fun ProductItem.toEntity(): ProductEntity {
     return ProductEntity(id, name, description, price, hasDrink, imageUrl, categories)
 }
+
+fun ProductDto.toEntity(): ProductEntity {
+    return ProductEntity(
+        id = id,
+        name = name,
+        description = description,
+        price = price,
+        hasDrink = hasDrink,
+        imageUrl = imageUrl,
+        categories = categories
+    )
+}
+
+fun ProductDto.toDomain(): ProductItem {
+    return ProductItem(
+        id = id,
+        name = name,
+        description = description,
+        price = price,
+        hasDrink = hasDrink,
+        imageUrl = imageUrl,
+        categories = categories
+    )
+}
+
+
 

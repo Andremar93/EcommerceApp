@@ -11,16 +11,16 @@ import kotlinx.coroutines.flow.Flow
 interface ProductDao {
 
     @Query("SELECT * FROM products")
-    suspend fun getAll(): List<ProductEntity>
+    suspend fun getProducts(): List<ProductEntity>
 
     @Query("SELECT * FROM products")
-    fun observeAll(): Flow<List<ProductEntity>>
+    fun observeProducts(): Flow<List<ProductEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(products: List<ProductEntity>)
+    suspend fun insertProducts(products: List<ProductEntity>)
 
     @Query("DELETE FROM products")
-    suspend fun clearAll()
+    suspend fun clearProducts()
 
     @Query("SELECT * FROM products WHERE id = :id LIMIT 1")
     suspend fun getProductById(id: String): ProductEntity?

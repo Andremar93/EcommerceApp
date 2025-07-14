@@ -1,7 +1,7 @@
 package com.example.ecommerceapp.presentation.view.viewmodel
 
 import android.util.Log
-import com.example.ecommerceapp.domain.model.Product
+import com.example.ecommerceapp.domain.model.ProductItem
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -9,23 +9,22 @@ import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ecommerceapp.domain.repository.CartRepository
-import com.example.ecommerceapp.domain.use_case.product.GetProductsFromApiUseCase
-import com.example.ecommerceapp.domain.use_case.product.GetProductsFromLocalUseCase
-import com.example.ecommerceapp.domain.use_case.product.SaveProductsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import com.example.ecommerceapp.domain.use_case.product.GetProductsUseCase
+import com.example.ecommerceapp.presentation.view.components.UIState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import okio.IOException
+import retrofit2.HttpException
 
 @HiltViewModel
 class ProductListViewModel @Inject constructor(
-    private val getProductsFromApi: GetProductsFromApiUseCase,
-    private val getProductsFromLocal: GetProductsFromLocalUseCase,
-    private val saveProducts: SaveProductsUseCase,
+    private val getProductsUseCase: GetProductsUseCase,
     private val cartRepository: CartRepository
 ) : ViewModel() {
 
@@ -38,10 +37,10 @@ class ProductListViewModel @Inject constructor(
 
     var addingProductId by mutableStateOf<String?>(null)
 
-    private val _filteredProducts = mutableStateOf<List<Product>>(emptyList())
-    val filteredProducts: State<List<Product>> = _filteredProducts
+    private val _filteredProducts = mutableStateOf<List<ProductItem>>(emptyList())
+    val filteredProducts: State<List<ProductItem>> = _filteredProducts
 
-    private var allProducts: List<Product> = emptyList()
+    private var allProductItems: List<ProductItem> = emptyList()
     private var currentQuery = ""
     private var currentCategory: String? = null
     var currentSortAscending = true
@@ -49,44 +48,48 @@ class ProductListViewModel @Inject constructor(
     private val _productQuantities: SnapshotStateMap<String, Int> = mutableStateMapOf()
     val productQuantities: Map<String, Int> get() = _productQuantities
 
-    private val _lastAddedProduct = mutableStateOf<Product?>(null)
-    val lastAddedProduct: State<Product?> = _lastAddedProduct
+    private val _lastAddedProductItem = mutableStateOf<ProductItem?>(null)
+    val lastAddedProductItem: State<ProductItem?> = _lastAddedProductItem
 
-    private val _isLoading = mutableStateOf(true)
-    val isLoading: State<Boolean> = _isLoading
+    var uiState by mutableStateOf<UIState<List<ProductItem>>>(UIState.Loading)
 
-    init {
-        loadProducts()
-    }
-
-    private fun loadProducts() {
-        _isLoading.value = true
+    fun loadProducts(refreshData: Boolean) {
         viewModelScope.launch {
-            allProducts = getProductsFromLocal()
-            _allCategories.value = listOf("Todas") + allProducts.flatMap { it.categories }.distinct()
-            applyFilters()
-            _isLoading.value = false
-
+            uiState = UIState.Loading
             try {
-                val remoteProducts = getProductsFromApi()
-                Log.d("API", "Productos desde API: ${remoteProducts.size}")
-                saveProducts(remoteProducts)
-                allProducts = remoteProducts
-                _allCategories.value = listOf("Todas") + allProducts.flatMap { it.categories }.distinct()
+
+                val products = getProductsUseCase.invoke(refreshData)
+
+                _allCategories.value =
+                    listOf("Todas") + allProductItems.flatMap { it.categories }.distinct()
+
                 applyFilters()
+                uiState = UIState.Success(products)
+                allProductItems = getProductsUseCase()
+
+
+            } catch (e: IOException) {
+                uiState = UIState.Error("Sin conexión a Internet")
+                Log.e(
+                    "ProductListViewModel",
+                    "Sin conexión a Internet, error al cargar los productos",
+                    e
+                )
+            } catch (e: HttpException) {
+                uiState = UIState.Error("Error al cargar los productos: ${e.message}")
             } catch (e: Exception) {
-                Log.e("ProductListViewModel", "API fetch failed", e)
+                uiState = UIState.Error("Error inesperado: ${e.message ?: "Desconocido"}")
+                Log.e("ProductListViewModel", "Error inesperado al cargar los productos", e)
             }
         }
     }
 
-
-    fun addToCart(product: Product, quantity: Int) {
+    fun addToCart(productItem: ProductItem, quantity: Int) {
         viewModelScope.launch {
-            addingProductId = product.id
+            addingProductId = productItem.id
             delay(300)
-            if (cartRepository.addToCart(product, quantity)) {
-                _lastAddedProduct.value = product
+            if (cartRepository.addToCart(productItem, quantity)) {
+                _lastAddedProductItem.value = productItem
             }
         }
     }
@@ -107,7 +110,7 @@ class ProductListViewModel @Inject constructor(
     }
 
     fun applyFilters() {
-        var result = allProducts
+        var result = allProductItems
         if (currentQuery.isNotBlank()) {
             result = result.filter { prod ->
                 val matchesText = prod.name.contains(currentQuery, ignoreCase = true)
@@ -152,7 +155,7 @@ class ProductListViewModel @Inject constructor(
     }
 
     fun resetLastAddedProduct() {
-        _lastAddedProduct.value = null
+        _lastAddedProductItem.value = null
     }
 
 }

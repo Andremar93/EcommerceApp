@@ -1,6 +1,6 @@
 package com.example.ecommerceapp.data.model
 
-import com.example.ecommerceapp.domain.model.Product
+import com.example.ecommerceapp.domain.model.ProductItem
 import com.google.gson.annotations.SerializedName
 
 data class ProductDto(
@@ -11,6 +11,4 @@ data class ProductDto(
     val imageUrl: String,
     val categories: List<String>,
     val hasDrink: Boolean
-) {
-    fun toDomain() = Product(id, name, description, price, hasDrink, imageUrl, categories)
-}
+)

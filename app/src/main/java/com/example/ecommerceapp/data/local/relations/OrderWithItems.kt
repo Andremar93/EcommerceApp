@@ -3,7 +3,8 @@ package com.example.ecommerceapp.data.local.relations
 import androidx.room.Embedded
 import androidx.room.Relation
 import com.example.ecommerceapp.data.local.entity.OrderEntity
-import com.example.ecommerceapp.data.local.entity.OrderItemEntity
+import com.example.ecommerceapp.data.local.entity.OrderItemsEntity
+import com.example.ecommerceapp.data.local.entity.UserEntity
 
 data class OrderWithItems(
     @Embedded val order: OrderEntity,
@@ -11,5 +12,14 @@ data class OrderWithItems(
         parentColumn = "id",
         entityColumn = "orderId"
     )
-    val items: List<OrderItemEntity>
+    val items: List<OrderItemsEntity>
+)
+
+data class UserWithOrders(
+    @Embedded val user: UserEntity,
+    @Relation(
+        parentColumn = "id",
+        entityColumn = "userId"
+    )
+    val orders: List<OrderEntity>
 )

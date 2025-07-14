@@ -6,21 +6,25 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ecommerceapp.domain.repository.CartRepository
-import com.example.ecommerceapp.data.local.entity.OrderEntity
-import com.example.ecommerceapp.data.local.entity.OrderItemEntity
-import com.example.ecommerceapp.domain.repository.OrdersRepository
-import com.example.ecommerceapp.domain.model.Product
+import com.example.ecommerceapp.domain.model.OrderItemsItem
+import com.example.ecommerceapp.domain.model.OrderItem
+import com.example.ecommerceapp.domain.model.ProductItem
+import com.example.ecommerceapp.domain.use_case.order.CreateOrderUseCase
+import com.example.ecommerceapp.domain.use_case.user.GetActiveUserUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.collections.sumOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import java.util.UUID
 
 @HiltViewModel
 class CartViewModel @Inject constructor(
     private val cartRepository: CartRepository,
-    private val ordersRepository: OrdersRepository
+    private var getActiveUserUseCase: GetActiveUserUseCase,
+    private val createOrderUseCase: CreateOrderUseCase
+
 ) : ViewModel() {
 
     val cartItems = cartRepository.cartItems
@@ -36,28 +40,29 @@ class CartViewModel @Inject constructor(
 
     var checkoutSuccess by mutableStateOf(false)
 
-    init {
+
+    fun loadCart() {
         viewModelScope.launch {
             cartItems.collect { items ->
                 _cartItemCount.value = items.size
                 _totalProducts.value = items.sumOf { it.quantity }
-                _totalPrice.value = items.sumOf { it.product.price * it.quantity }
+                _totalPrice.value = items.sumOf { it.productItem.price * it.quantity }
             }
         }
     }
 
-    fun increaseQuantity(product: Product) {
-        val current = cartItems.value.find { it.product.id == product.id }?.quantity ?: 0
-        cartRepository.updateQuantity(product, current + 1)
+    fun increaseQuantity(productItem: ProductItem) {
+        val current = cartItems.value.find { it.productItem.id == productItem.id }?.quantity ?: 0
+        cartRepository.updateQuantity(productItem, current + 1)
     }
 
-    fun decreaseQuantity(product: Product) {
-        val current = cartItems.value.find { it.product.id == product.id }?.quantity ?: 0
-        cartRepository.updateQuantity(product, current - 1)
+    fun decreaseQuantity(productItem: ProductItem) {
+        val current = cartItems.value.find { it.productItem.id == productItem.id }?.quantity ?: 0
+        cartRepository.updateQuantity(productItem, current - 1)
     }
 
-    fun removeFromCart(product: Product) {
-        cartRepository.removeFromCart(product)
+    fun removeFromCart(productItem: ProductItem) {
+        cartRepository.removeFromCart(productItem)
     }
 
     fun clearCart() {
@@ -68,24 +73,34 @@ class CartViewModel @Inject constructor(
         viewModelScope.launch {
             val items = cartItems.value
             if (items.isEmpty()) return@launch
-
-            val order = OrderEntity(
-                orderDate = System.currentTimeMillis(),
-                totalAmount = items.sumOf { it.product.price * it.quantity },
-                totalItems = items.sumOf { it.quantity }
-            )
-
+            val generatedOrderId = UUID.randomUUID().toString()
             val orderItems = items.map { cartItem ->
-                OrderItemEntity(
-                    orderId = 0L,
-                    productId = cartItem.product.id,
+                OrderItemsItem(
+                    orderId = generatedOrderId,
+                    productId = cartItem.productItem.id,
                     quantity = cartItem.quantity,
-                    price = cartItem.product.price,
-                    productName = cartItem.product.name
+                    price = cartItem.productItem.price,
+                    productName = cartItem.productItem.name,
+                    avatar = cartItem.productItem.imageUrl,
+                    description = cartItem.productItem.description,
+                    categories = cartItem.productItem.categories,
+                    hasDrink = cartItem.productItem.hasDrink
                 )
             }
 
-            ordersRepository.createOrder(order, orderItems)
+            val activeUser = getActiveUserUseCase.invoke()
+            val userId = activeUser.id
+
+            val order = OrderItem(
+                orderId = generatedOrderId,
+                date = System.currentTimeMillis(),
+                totalAmount = items.sumOf { it.productItem.price * it.quantity },
+                totalItems = items.sumOf { it.quantity },
+                items = orderItems,
+                userId = userId,
+            )
+
+            val createdOrder = createOrderUseCase.invoke(order, orderItems)
             clearCart()
             checkoutSuccess = true
         }

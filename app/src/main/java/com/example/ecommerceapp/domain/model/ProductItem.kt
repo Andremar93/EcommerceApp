@@ -1,6 +1,6 @@
 package com.example.ecommerceapp.domain.model
 
-data class Product(
+data class ProductItem(
     val id: String,
     val name: String,
     val description: String,

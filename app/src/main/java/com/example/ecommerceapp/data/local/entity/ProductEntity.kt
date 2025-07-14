@@ -3,7 +3,7 @@ package com.example.ecommerceapp.data.local.entity
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.example.ecommerceapp.domain.model.Product
+import com.example.ecommerceapp.domain.model.ProductItem
 
 @Entity(
     tableName = "products",
@@ -18,8 +18,4 @@ data class ProductEntity(
     val imageUrl: String,
     val categories: List<String>,
     val isActive: Boolean = true
-) {
-    fun toDomain() = Product(id, name, description, price, hasDrink, imageUrl, categories)
-}
-
-fun Product.toEntity() = ProductEntity(id, name, description, price, hasDrink, imageUrl, categories)
+)

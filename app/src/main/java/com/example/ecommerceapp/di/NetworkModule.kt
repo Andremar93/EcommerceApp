@@ -1,5 +1,6 @@
 package com.example.ecommerceapp.di
 
+import com.example.ecommerceapp.BuildConfig
 import com.example.ecommerceapp.data.remote.ProductApiService
 import com.example.ecommerceapp.data.remote.UserApiService
 import com.example.ecommerceapp.data.remote.OrdersApiService
@@ -13,8 +14,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 
-//private const val BASE_URL = "http://10.0.2.2:4000/"
-private const val BASE_URL = "https://peya-backend.onrender.com/"
+private const val BASE_URL = BuildConfig.BASE_URL
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {

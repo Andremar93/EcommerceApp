@@ -10,6 +10,12 @@ android {
     namespace = "com.example.ecommerceapp"
     compileSdk = 35
 
+    buildFeatures {
+        buildConfig = true
+        compose = true
+        viewBinding = true
+    }
+
     defaultConfig {
         applicationId = "com.example.ecommerceapp"
         minSdk = 27
@@ -18,6 +24,22 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField(
+            "String",
+            "CLOUDINARY_NAME",
+            "\"${project.properties["CLOUDINARY_NAME"]}\""
+        )
+        buildConfigField(
+            "String",
+            "CLOUDINARY_API_KEY",
+            "\"${project.properties["CLOUDINARY_API_KEY"]}\""
+        )
+        buildConfigField(
+            "String",
+            "CLOUDINARY_API_SECRET",
+            "\"${project.properties["CLOUDINARY_API_SECRET"]}\""
+        )
+        buildConfigField("String", "BASE_URL", "\"${project.properties["BASE_URL"]}\"")
     }
 
     buildTypes {
@@ -36,10 +58,7 @@ android {
     kotlinOptions {
         jvmTarget = "17"
     }
-    buildFeatures {
-        compose = true
-        viewBinding = true
-    }
+
 }
 
 dependencies {
@@ -64,7 +83,7 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockito.kotlin)
-    testImplementation (libs.kotlinx.coroutines.test)
+    testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
@@ -94,10 +113,10 @@ dependencies {
 
     implementation(libs.material3)
 
-    implementation (libs.androidx.room.runtime)
-    kapt (libs.androidx.room.compiler)
+    implementation(libs.androidx.room.runtime)
+    kapt(libs.androidx.room.compiler)
 
-    implementation (libs.androidx.room.ktx)
+    implementation(libs.androidx.room.ktx)
 
     implementation(libs.cloudinary.android)
 

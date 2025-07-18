@@ -3,7 +3,6 @@ package com.example.ecommerceapp.presentation.view.viewmodel
 import android.app.Application
 import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cloudinary.Cloudinary
 import com.example.ecommerceapp.domain.model.User
@@ -14,9 +13,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.example.ecommerceapp.BuildConfig
 
 @HiltViewModel
 class UserViewModel @Inject constructor(
@@ -38,14 +37,14 @@ class UserViewModel @Inject constructor(
     private val _isUpdatingUser = MutableStateFlow(false)
     val isUpdatingUser: StateFlow<Boolean> = _isUpdatingUser
 
-
     private val cloudinary = Cloudinary(
         mapOf(
-            "cloud_name" to "dhnjnynfp",
-            "api_key" to "876161229965998",
-            "api_secret" to "Mo4luqlaWwwh94jpcuKK9UFO1EI",
+            "cloud_name" to BuildConfig.CLOUDINARY_NAME,
+            "api_key" to BuildConfig.CLOUDINARY_API_KEY,
+            "api_secret" to BuildConfig.CLOUDINARY_API_SECRET,
         )
     )
+
 
     fun loadUser() {
         viewModelScope.launch {

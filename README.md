@@ -15,26 +15,20 @@ Aplicación de ecommerce desarrollada con **Kotlin**, **Jetpack Compose**, **MVV
 
 - Registro e inicio de sesión de usuarios (Se guardan en la base de datos, simple. NO encripta el password)
 - Carga de productos (Desde el backend)
-- Agregado al carrito (Guarda el carrito en base de datos)
+- Agregado al carrito (Guarda el carrito en base de datos con ROOM)
 - Listado y detalles de órdenes (Se guardan las ordenes en la base de datos y hay un screen para ver las ordenes)
 
 ## 🧩 Cosas por mejorar o agregar
-- [ ] En la pagina de perfil el usuario esta harcodeado
-- [ ] Validaciones más robustas en formularios (registro y login)
 - [ ] Mejorar experiencia de usuario con animaciones (transiciones, feedback visual)
 - [ ] Modo oscuro para toda la app
 - [ ] Agregar soporte offline con Room y sincronización automática
 - [ ] Internacionalización: soporte para varios idiomas
-- [ ] Refactor de algunos viewmodels para mejorar separación de responsabilidades
 - [ ] Mejorar el manejo de errores y mostrar mensajes claros al usuario
 - [ ] Mejorar todo la interfaz gráfica
-- [ ] Las ordenes no estan asociadas a los usarios todavia.
-- [ ] No hay forma de cerrar sesion
 - [ ] y muchas mas... 
 
 ## 🐞 Bugs conocidos
 
-- [ ] 🔄 La página de inicio/productos parece que esta cargando dos veces o algo parecido porque a veces hace un glitch
 
 ## 🧪 Tests
 Próximamente...
@@ -61,16 +55,21 @@ Próximamente...
 
 📦EcommerceApp
 ┣ 📂data
-┃ ┣ 📂cart
-┃ ┣ 📂database
-┃ ┣ 📂fakeRepositories (se uso cuando no habia backend)
-┃ ┣ 📂orders
-┃ ┣ 📂productItems
-┃ ┣ 📂remote
-┃ ┗ 📂users
-┣ 📂di
-┣ 📂domain
+┃ ┣ 📂local
 ┃ ┣ 📂model
+┃ ┣ 📂remote
+┃ ┗ 📂repository
+┣ 📂di
+┃ ┣ 📂CartModule
+┃ ┣ 📂NetworkModule
+┃ ┣ 📂OrdersModule
+┃ ┣ 📂ProductsModule
+┃ ┣ 📂RoomModule
+┃ ┗ 📂UsersModule
+┣ 📂domain
+┃ ┣ 📂local.data_source
+┃ ┣ 📂model
+┃ ┣ 📂remote.data_source
 ┃ ┣ 📂repository
 ┃ ┗ 📂use_case
 ┣ 📂presentation

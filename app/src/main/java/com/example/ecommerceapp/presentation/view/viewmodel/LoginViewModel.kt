@@ -1,11 +1,13 @@
 package com.example.ecommerceapp.presentation.view.viewmodel
 
+import android.util.Log
 import android.util.Patterns
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
+import com.example.ecommerceapp.BuildConfig
 import com.example.ecommerceapp.domain.use_case.user.LoginResult
 import com.example.ecommerceapp.domain.use_case.user.LoginUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel

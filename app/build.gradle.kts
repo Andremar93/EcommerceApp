@@ -1,3 +1,21 @@
+import java.util.Properties
+
+
+val localProperties = Properties()
+localProperties.load(rootProject.file("local.properties").inputStream())
+
+val baseUrl = localProperties["BASE_URL"]?.toString()
+    ?: throw GradleException("BASE_URL not found in local.properties")
+
+val cloudinaryName = localProperties["CLOUDINARY_NAME"]?.toString()
+    ?: throw GradleException("CLOUDINARY_NAME not found in local.properties")
+
+val cloudinaryKey = localProperties["CLOUDINARY_API_KEY"]?.toString()
+    ?: throw GradleException("CLOUDINARY_API_KEY not found in local.properties")
+
+val cloudinarySecret = localProperties["CLOUDINARY_API_SECRET"]?.toString()
+    ?: throw GradleException("CLOUDINARY_API_SECRET not found in local.properties")
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -24,22 +42,11 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField(
-            "String",
-            "CLOUDINARY_NAME",
-            "\"${project.properties["CLOUDINARY_NAME"]}\""
-        )
-        buildConfigField(
-            "String",
-            "CLOUDINARY_API_KEY",
-            "\"${project.properties["CLOUDINARY_API_KEY"]}\""
-        )
-        buildConfigField(
-            "String",
-            "CLOUDINARY_API_SECRET",
-            "\"${project.properties["CLOUDINARY_API_SECRET"]}\""
-        )
-        buildConfigField("String", "BASE_URL", "\"${project.properties["BASE_URL"]}\"")
+
+        buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
+        buildConfigField("String", "CLOUDINARY_NAME", "\"$cloudinaryName\"")
+        buildConfigField("String", "CLOUDINARY_API_KEY", "\"$cloudinaryKey\"")
+        buildConfigField("String", "CLOUDINARY_API_SECRET", "\"$cloudinarySecret\"")
     }
 
     buildTypes {

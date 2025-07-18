@@ -90,7 +90,7 @@
     <string name="cancel">Cancelar</string>
     <string name="edit_profile">Editar Perfil</string>
     <string name="save">Guardar</string>
-    [
+    <string name="profile_files_permission">Necesitamos permiso para acceder a tus imágenes.</string>
     <!-- SettingsScreen -->
     <string name="settings">Ajustes</string>
     <string name="under_construction_title">Página en construcción</string>

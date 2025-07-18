@@ -1,6 +1,10 @@
 package com.example.ecommerceapp.presentation.view.views
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -33,6 +37,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
@@ -47,7 +52,9 @@ import com.example.ecommerceapp.presentation.view.viewmodel.UserViewModel
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.mapSaver
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.core.content.ContextCompat
 import com.example.ecommerceapp.R
 
 @Composable
@@ -74,6 +81,7 @@ fun UserScreenContent(
     userViewModel: UserViewModel,
     navController: NavHostController,
 ) {
+
     val user by userViewModel.user.collectAsState()
     var selectedImageUri by rememberSaveable { mutableStateOf<Uri?>(null) }
     var isEditable by rememberSaveable { mutableStateOf(false) }
@@ -112,12 +120,24 @@ fun UserScreenContent(
         }
     }
 
+
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         selectedImageUri = uri
         if (uri != null) {
             userViewModel.uploadImage(uri)
         }
     }
+
+    var wantToPickImage by remember { mutableStateOf(false) }
+
+    RequestImagePermission(
+        onGranted = {
+            if (wantToPickImage) {
+                launcher.launch("image/*")
+                wantToPickImage = false
+            }
+        }
+    )
 
     LaunchedEffect(Unit) {
         userViewModel.loadUser()
@@ -138,7 +158,7 @@ fun UserScreenContent(
             avatarUrl = user.avatar,
             userViewModel,
             isEditable = isEditable,
-            onImageClick = { launcher.launch("image/*") }
+            onImageClick = { wantToPickImage = true }
         )
 
 
@@ -273,13 +293,23 @@ fun UserProfileFields(
 
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         ProfileField(stringResource(id = R.string.first_name), name, isEditable) { name = it }
-        ProfileField(stringResource(id = R.string.last_name), lastName, isEditable) { lastName = it }
-        ProfileField(stringResource(id = R.string.nationality), nationality, isEditable) { nationality = it }
+        ProfileField(stringResource(id = R.string.last_name), lastName, isEditable) {
+            lastName = it
+        }
+        ProfileField(
+            stringResource(id = R.string.nationality),
+            nationality,
+            isEditable
+        ) { nationality = it }
         ProfileField(stringResource(id = R.string.email), email, isEditable) { email = it }
 
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            PrimaryButton(if (isEditable) stringResource(id = R.string.cancel) else stringResource(id = R.string.edit_profile)) {
+            PrimaryButton(
+                if (isEditable) stringResource(id = R.string.cancel) else stringResource(
+                    id = R.string.edit_profile
+                )
+            ) {
                 if (isEditable) {
                     name = originalUser.name
                     lastName = originalUser.lastName
@@ -336,6 +366,40 @@ fun PrimaryButton(text: String, onClick: () -> Unit) {
             .padding(vertical = 4.dp)
     ) {
         Text(text)
+    }
+}
+
+
+@Composable
+fun RequestImagePermission(
+    onGranted: () -> Unit
+) {
+    val context = LocalContext.current
+    val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        Manifest.permission.READ_MEDIA_IMAGES
+    } else {
+        Manifest.permission.READ_EXTERNAL_STORAGE
+    }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            onGranted()
+        } else {
+            Toast.makeText(
+                context,
+                context.getString(R.string.profile_files_permission),
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        when (PackageManager.PERMISSION_GRANTED) {
+            ContextCompat.checkSelfPermission(context, permission) -> onGranted()
+            else -> permissionLauncher.launch(permission)
+        }
     }
 }
 

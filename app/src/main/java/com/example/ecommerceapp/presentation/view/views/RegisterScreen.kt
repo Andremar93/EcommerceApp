@@ -26,14 +26,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.ecommerceapp.presentation.view.viewmodel.RegisterViewModel
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.ecommerceapp.presentation.view.viewmodel.LoginViewModel
+import com.example.ecommerceapp.R
 import com.example.ecommerceapp.presentation.view.viewmodel.RegisterViewModel.RegisterState
 
 @Composable
@@ -74,28 +75,9 @@ fun RegisterScreen(
         onConfirmPasswordChange = { viewModel.confirmPassword = it; viewModel.onFieldChanged() },
         onRegisterClick = { viewModel.onRegisterClick() },
 
-    )
+        )
 }
 
-
-
-//@Preview(showBackground = true)
-//@Composable
-//fun RegisterScreenPreview() {
-//    RegisterScreenContent(
-//        name = "Andrea",
-//        lastName = "Martínez",
-//        email = "andrea@example.com",
-//        password = "123456",
-//        confirmPassword = "123456",
-//        nationality = "Venezolana",
-//        isFormValid = true,
-//        onEmailChange = {},
-//        onPasswordChange = {},
-//        onConfirmPasswordChange = {},
-//        onRegisterClick = {}
-//    )
-//}
 
 @Composable
 fun RegisterScreenContent(
@@ -121,7 +103,7 @@ fun RegisterScreenContent(
     onConfirmPasswordChange: (String) -> Unit,
     onRegisterClick: () -> Unit,
 
-) {
+    ) {
     var passwordVisible by remember { mutableStateOf(false) }
     var confirmPasswordVisible by remember { mutableStateOf(false) }
 
@@ -132,23 +114,47 @@ fun RegisterScreenContent(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        OutlinedTextField(value = name, onValueChange = onNameChange, label = { Text("Nombre") })
+
+        Text(
+            text = stringResource(R.string.register_title),
+            style = MaterialTheme.typography.headlineLarge,
+            color = MaterialTheme.colorScheme.primary,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 0.5.sp,
+            maxLines = 1
+        )
+        Spacer(Modifier.height(10.dp))
+
+        OutlinedTextField(
+            value = name,
+            onValueChange = onNameChange,
+            label = { Text(stringResource(R.string.register_name)) })
         Spacer(Modifier.height(8.dp))
 
-        OutlinedTextField(value = lastName, onValueChange = onLastNameChange, label = { Text("Apellido") })
+        OutlinedTextField(
+            value = lastName,
+            onValueChange = onLastNameChange,
+            label = { Text(stringResource(R.string.register_last_name)) })
         Spacer(Modifier.height(8.dp))
 
-        OutlinedTextField(value = nationality, onValueChange = onNationalityChange, label = { Text("Nacionalidad") })
+        OutlinedTextField(
+            value = nationality,
+            onValueChange = onNationalityChange,
+            label = { Text(stringResource(R.string.register_nationality)) })
         Spacer(Modifier.height(8.dp))
 
         OutlinedTextField(
             value = email,
             onValueChange = onEmailChange,
-            label = { Text("Email") },
+            label = { Text(stringResource(R.string.register_email)) },
             isError = emailError != null
         )
         emailError?.let {
-            Text(text = it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+            Text(
+                text = it,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall
+            )
         }
 
         Spacer(Modifier.height(8.dp))
@@ -156,18 +162,26 @@ fun RegisterScreenContent(
         OutlinedTextField(
             value = password,
             onValueChange = onPasswordChange,
-            label = { Text("Contraseña") },
+            label = { Text(stringResource(R.string.register_password)) },
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             isError = passwordError != null,
             trailingIcon = {
-                val icon = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff
+                val icon =
+                    if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff
                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                    Icon(imageVector = icon, contentDescription = "Mostrar contraseña")
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = stringResource(R.string.password_toggle_description)
+                    )
                 }
             }
         )
         passwordError?.let {
-            Text(text = it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+            Text(
+                text = it,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall
+            )
         }
 
         Spacer(Modifier.height(8.dp))
@@ -175,18 +189,26 @@ fun RegisterScreenContent(
         OutlinedTextField(
             value = confirmPassword,
             onValueChange = onConfirmPasswordChange,
-            label = { Text("Confirmar contraseña") },
+            label = { Text(stringResource(R.string.register_confirm_password)) },
             visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             isError = confirmPasswordError != null,
             trailingIcon = {
-                val icon = if (confirmPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff
+                val icon =
+                    if (confirmPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff
                 IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
-                    Icon(imageVector = icon, contentDescription = "Mostrar confirmación")
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = stringResource(R.string.confirm_password_toggle_description)
+                    )
                 }
             }
         )
         confirmPasswordError?.let {
-            Text(text = it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+            Text(
+                text = it,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall
+            )
         }
 
         Spacer(Modifier.height(16.dp))
@@ -199,7 +221,7 @@ fun RegisterScreenContent(
             if (registerState is RegisterState.Loading) {
                 CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
             } else {
-                Text("Registrarme")
+                Text(stringResource(R.string.register_button))
             }
         }
 
@@ -214,7 +236,10 @@ fun RegisterScreenContent(
 
 
         if (registerState is RegisterState.Success) {
-            Text("¡Registro exitoso!", color = MaterialTheme.colorScheme.primary)
+            Text(
+                stringResource(R.string.register_success),
+                color = MaterialTheme.colorScheme.primary
+            )
         }
 
     }

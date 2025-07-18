@@ -34,6 +34,8 @@ import com.example.ecommerceapp.presentation.view.components.layout.MainLayout
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import com.example.ecommerceapp.presentation.view.components.UIState
+import androidx.compose.ui.res.stringResource
+import com.example.ecommerceapp.R
 
 @Composable
 fun ProductListScreen(
@@ -42,7 +44,6 @@ fun ProductListScreen(
 
     val productViewModel: ProductListViewModel = hiltViewModel()
 
-    val products by productViewModel.filteredProducts
     val productQuantities = productViewModel.productQuantities
     val lastAddedProduct by productViewModel.lastAddedProductItem
 
@@ -62,8 +63,11 @@ fun ProductListScreen(
 
     LaunchedEffect(lastAddedProduct) {
         lastAddedProduct?.let {
-            Toast.makeText(context, "Producto ${it.name} agregado al carrito", Toast.LENGTH_SHORT)
-                .show()
+            Toast.makeText(
+                context,
+                context.getString(R.string.product_added_to_cart, it.name),
+                Toast.LENGTH_SHORT
+            ).show()
         }
         productViewModel.resetLastAddedProduct()
     }
@@ -85,7 +89,7 @@ fun ProductListScreen(
                 }
 
                 is UIState.Success -> {
-                    val products = state.data
+                    val products by productViewModel.filteredProducts
                     if (products.isEmpty()) {
                         Column(modifier = Modifier.padding(8.dp)) {
                             ProductFilterBar(
@@ -113,10 +117,9 @@ fun ProductListScreen(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    "No se encontraron productos",
+                                    text = stringResource(id = R.string.no_products_found),
                                     style = MaterialTheme.typography.bodyLarge
                                 )
-
                             }
                         }
 

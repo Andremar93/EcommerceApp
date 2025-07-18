@@ -1,6 +1,9 @@
-package com.example.ecommerceapp.data.model
+package com.example.ecommerceapp.data.model.orders
 
-data class CartDto(
+import com.google.gson.annotations.SerializedName
+
+data class OrderItemDto(
+    @SerializedName("_id") val productId: String,
     val name: String,
     val description: String,
     val imageUrl: String,

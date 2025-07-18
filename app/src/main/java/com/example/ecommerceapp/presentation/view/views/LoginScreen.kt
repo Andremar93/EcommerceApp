@@ -25,6 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -33,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.example.ecommerceapp.R
 import com.example.ecommerceapp.presentation.view.viewmodel.LoginViewModel
 
 @Composable
@@ -43,6 +45,11 @@ fun LoginScreen(
 ) {
     val isLoggedIn = viewModel.isLoggedIn
     var passwordVisible by remember { mutableStateOf(false) }
+
+    val invalidEmailError = stringResource(R.string.error_invalid_email)
+    val passwordTooShortError = stringResource(R.string.error_password_too_short)
+    val fixErrorsMessage = stringResource(R.string.error_fix_errors_before_continue)
+    val allFieldsRequiredMessage = stringResource(R.string.error_all_fields_required)
 
     LaunchedEffect(isLoggedIn) {
         if (isLoggedIn) {
@@ -59,7 +66,7 @@ fun LoginScreen(
     ) {
 
         Text(
-            text = "Inicio de Sesión",
+            text = stringResource(R.string.login_title),
             style = MaterialTheme.typography.headlineLarge,
             color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Bold,
@@ -73,7 +80,7 @@ fun LoginScreen(
                 viewModel.email = it
                 viewModel.validateFields()
             },
-            label = { Text("Email") },
+            label = { Text(stringResource(R.string.login_email)) },
             isError = viewModel.emailError != null
         )
         viewModel.emailError?.let {
@@ -92,7 +99,7 @@ fun LoginScreen(
                 viewModel.password = it
                 viewModel.validateFields()
             },
-            label = { Text("Contraseña") },
+            label = { Text(stringResource(R.string.login_password)) },
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             isError = viewModel.passwordError != null,
             trailingIcon = {
@@ -104,7 +111,7 @@ fun LoginScreen(
                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
                     Icon(
                         imageVector = image,
-                        contentDescription = "Toggle Confirm Password Visibility"
+                        contentDescription = stringResource(R.string.password_visibility_toggle)
                     )
                 }
             }
@@ -123,7 +130,7 @@ fun LoginScreen(
             onClick = { viewModel.onLoginClicked() },
             enabled = viewModel.isFormValid
         ) {
-            Text("Iniciar sesión")
+            Text(stringResource(R.string.login_button))
         }
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -131,7 +138,7 @@ fun LoginScreen(
         TextButton(onClick = {
             navController.navigate("register")
         }) {
-            Text("¿No tienes cuenta? Registrarme")
+            Text(stringResource(R.string.login_register_prompt))
         }
 
         val state = viewModel.loginState
@@ -144,7 +151,7 @@ fun LoginScreen(
             )
 
             is LoginViewModel.LoginState.Success -> Text(
-                "¡Login exitoso!",
+                stringResource(R.string.login_success),
                 color = MaterialTheme.colorScheme.primary
             )
 
@@ -160,7 +167,7 @@ fun LoginScreen(
 @Composable
 fun LoginScreenPreview() {
     Text(
-        text = "Inicio de Sesión",
+        text = stringResource(R.string.login_title),
         style = MaterialTheme.typography.headlineLarge,
         color = MaterialTheme.colorScheme.primary,
         fontWeight = FontWeight.Bold,

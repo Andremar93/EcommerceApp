@@ -18,4 +18,6 @@ interface UserRepository {
     suspend fun getActiveUser(): User
 
     suspend fun updateUser(user: User): UpdateUserResult
+
+    suspend fun logoutUser(userId: String): Boolean
 }

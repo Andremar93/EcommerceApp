@@ -17,7 +17,6 @@ Aplicación de ecommerce desarrollada con **Kotlin**, **Jetpack Compose**, **MVV
 - Carga de productos (Desde el backend)
 - Agregado al carrito (Guarda el carrito en base de datos)
 - Listado y detalles de órdenes (Se guardan las ordenes en la base de datos y hay un screen para ver las ordenes)
-- Pagina de perfil de usuario (Se puede modificar, aun no tiene Cloudinary)
 
 ## 🧩 Cosas por mejorar o agregar
 - [ ] En la pagina de perfil el usuario esta harcodeado

@@ -1,10 +1,7 @@
 package com.example.ecommerceapp.di
 
-import com.example.ecommerceapp.data.local.dao.OrderDao
-import com.example.ecommerceapp.data.local.dao.OrderItemDao
 import com.example.ecommerceapp.data.local.dao.ProductDao
 import com.example.ecommerceapp.data.local.data_source.ProductLocalDataSourceImpl
-import com.example.ecommerceapp.data.remote.OrdersApiService
 import com.example.ecommerceapp.data.remote.ProductApiService
 import com.example.ecommerceapp.data.remote.data_source.ProductRemoteDataSourceImpl
 import com.example.ecommerceapp.data.repository.OrdersRepositoryImpl

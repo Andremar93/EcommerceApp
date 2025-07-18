@@ -8,4 +8,6 @@ interface UsersLocalDataSource {
     suspend fun setActiveUser(id: String)
     suspend fun getActiveUser(): User?
     suspend fun updateUser(user: User)
+    suspend fun logoutUser(userId: String): Boolean
+    suspend fun logoutAllUsers()
 }

@@ -4,7 +4,7 @@ import com.example.ecommerceapp.domain.model.ProductItem
 import com.example.ecommerceapp.domain.repository.ProductRepository
 
 import com.example.ecommerceapp.data.local.mappers.toDomain
-import com.example.ecommerceapp.data.model.ProductDto
+import com.example.ecommerceapp.data.model.products.ProductDto
 import com.example.ecommerceapp.domain.local.data_source.ProductLocalDataSource
 import com.example.ecommerceapp.domain.remote.data_source.ProductRemoteDataSource
 import javax.inject.Inject

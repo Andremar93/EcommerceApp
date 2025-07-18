@@ -9,6 +9,7 @@ import com.example.ecommerceapp.domain.repository.CartRepository
 import com.example.ecommerceapp.domain.model.OrderItemsItem
 import com.example.ecommerceapp.domain.model.OrderItem
 import com.example.ecommerceapp.domain.model.ProductItem
+import com.example.ecommerceapp.domain.use_case.cart.GetCartItemCountUseCase
 import com.example.ecommerceapp.domain.use_case.order.CreateOrderUseCase
 import com.example.ecommerceapp.domain.use_case.user.GetActiveUserUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,14 +24,13 @@ import java.util.UUID
 class CartViewModel @Inject constructor(
     private val cartRepository: CartRepository,
     private var getActiveUserUseCase: GetActiveUserUseCase,
-    private val createOrderUseCase: CreateOrderUseCase
-
+    private val createOrderUseCase: CreateOrderUseCase,
+    private val getCartItemCountUseCase: GetCartItemCountUseCase
 ) : ViewModel() {
 
     val cartItems = cartRepository.cartItems
 
-    private val _cartItemCount = MutableStateFlow(0)
-    val cartItemCount: StateFlow<Int> = _cartItemCount
+    val cartItemCount: StateFlow<Int> = cartRepository.cartItemCount
 
     private val _totalProducts = MutableStateFlow(0)
     val totalProducts: StateFlow<Int> = _totalProducts
@@ -44,11 +44,15 @@ class CartViewModel @Inject constructor(
     fun loadCart() {
         viewModelScope.launch {
             cartItems.collect { items ->
-                _cartItemCount.value = items.size
+//                _cartItemCount.value = items.size
                 _totalProducts.value = items.sumOf { it.quantity }
                 _totalPrice.value = items.sumOf { it.productItem.price * it.quantity }
             }
         }
+    }
+
+    suspend fun getCartItemCount(): Int {
+        return getCartItemCountUseCase.invoke()
     }
 
     fun increaseQuantity(productItem: ProductItem) {
@@ -100,7 +104,7 @@ class CartViewModel @Inject constructor(
                 userId = userId,
             )
 
-            val createdOrder = createOrderUseCase.invoke(order, orderItems)
+            createOrderUseCase.invoke(order, orderItems)
             clearCart()
             checkoutSuccess = true
         }

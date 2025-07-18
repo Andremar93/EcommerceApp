@@ -1,7 +1,7 @@
 package com.example.ecommerceapp.data.remote.data_source
 
-import com.example.ecommerceapp.data.remote.LoginRequest
-import com.example.ecommerceapp.data.remote.RegisterRequest
+import com.example.ecommerceapp.data.model.users.LoginRequest
+import com.example.ecommerceapp.data.model.users.RegisterRequest
 import com.example.ecommerceapp.data.remote.UserApiService
 import com.example.ecommerceapp.domain.model.User
 import com.example.ecommerceapp.domain.remote.data_source.UsersRemoteDataSource

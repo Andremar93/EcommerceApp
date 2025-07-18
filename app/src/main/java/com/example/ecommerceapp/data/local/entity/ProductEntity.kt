@@ -3,7 +3,6 @@ package com.example.ecommerceapp.data.local.entity
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.example.ecommerceapp.domain.model.ProductItem
 
 @Entity(
     tableName = "products",

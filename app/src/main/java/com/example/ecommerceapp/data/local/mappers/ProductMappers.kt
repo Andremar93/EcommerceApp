@@ -1,7 +1,7 @@
 package com.example.ecommerceapp.data.local.mappers
 
 import com.example.ecommerceapp.data.local.entity.ProductEntity
-import com.example.ecommerceapp.data.model.ProductDto
+import com.example.ecommerceapp.data.model.products.ProductDto
 import com.example.ecommerceapp.domain.model.ProductItem
 
 fun ProductEntity.toDomain(): ProductItem {

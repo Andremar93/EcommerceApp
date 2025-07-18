@@ -3,9 +3,9 @@ package com.example.ecommerceapp.data.local.mappers
 import com.example.ecommerceapp.data.local.entity.OrderEntity
 import com.example.ecommerceapp.data.local.entity.OrderItemsEntity
 import com.example.ecommerceapp.data.local.relations.OrderWithItems
-import com.example.ecommerceapp.data.model.OrderDto
-import com.example.ecommerceapp.data.model.OrderGetRequestDto
-import com.example.ecommerceapp.data.model.OrderItemDto
+import com.example.ecommerceapp.data.model.orders.OrderDto
+import com.example.ecommerceapp.data.model.orders.OrderGetRequestDto
+import com.example.ecommerceapp.data.model.orders.OrderItemDto
 import com.example.ecommerceapp.domain.model.OrderItem
 import com.example.ecommerceapp.domain.model.OrderItemsItem
 import java.util.UUID

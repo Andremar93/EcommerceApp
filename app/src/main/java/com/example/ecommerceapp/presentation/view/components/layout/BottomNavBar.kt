@@ -18,11 +18,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import kotlinx.coroutines.flow.StateFlow
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.ecommerceapp.presentation.view.viewmodel.CartViewModel
-import androidx.compose.runtime.getValue
 
 @Composable
 fun BottomNavBar(

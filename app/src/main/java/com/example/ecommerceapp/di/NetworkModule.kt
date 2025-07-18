@@ -13,9 +13,8 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 
-
-private const val BASE_URL = "http://10.0.2.2:4000/"
-//private const val BASE_URL = "https://peya-backend.onrender.com/"
+//private const val BASE_URL = "http://10.0.2.2:4000/"
+private const val BASE_URL = "https://peya-backend.onrender.com/"
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {

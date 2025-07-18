@@ -1,34 +1,15 @@
 package com.example.ecommerceapp.data.remote
 
-import com.example.ecommerceapp.data.model.UserDto
+import com.example.ecommerceapp.data.model.users.LoginRequest
+import com.example.ecommerceapp.data.model.users.LoginResponse
+import com.example.ecommerceapp.data.model.users.RegisterRequest
+import com.example.ecommerceapp.data.model.users.RegisterResponse
+import com.example.ecommerceapp.data.model.users.UserDto
 import com.example.ecommerceapp.domain.use_case.user.UpdateUserRequest
 import retrofit2.http.Body
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
-
-data class LoginRequest(
-    val email: String,
-    val encryptedPassword: String
-)
-
-data class LoginResponse(
-    val message: String,
-    val user: UserDto
-)
-
-data class RegisterResponse(
-    val message: String,
-    val user: UserDto
-)
-
-data class RegisterRequest(
-    val email: String,
-    val encryptedPassword: String,
-    val fullName: String,
-    val userImageUrl: String,
-    val nationality: String
-)
 
 interface UserApiService {
 

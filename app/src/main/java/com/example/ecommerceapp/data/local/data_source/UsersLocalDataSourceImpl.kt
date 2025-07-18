@@ -27,7 +27,15 @@ class UsersLocalDataSourceImpl @Inject constructor(
         return usersDao.getActiveUser()?.toDomain()
     }
 
+    override suspend fun logoutUser(userId: String): Boolean {
+        return usersDao.logoutUserById(userId) > 0
+    }
+
     override suspend fun updateUser(user: User) {
         return usersDao.updateUser(user.toEntity())
+    }
+
+    override suspend fun logoutAllUsers(){
+        return usersDao.logoutAllUsers()
     }
 }

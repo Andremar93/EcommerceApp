@@ -1,17 +1,13 @@
 package com.example.ecommerceapp.data.repository
 
 import android.util.Log
-import com.example.ecommerceapp.data.local.dao.UsersDao
-import com.example.ecommerceapp.data.remote.LoginRequest
-import com.example.ecommerceapp.data.remote.RegisterRequest
-import com.example.ecommerceapp.data.remote.UserApiService
+import androidx.lifecycle.viewModelScope
 import com.example.ecommerceapp.domain.local.data_source.UsersLocalDataSource
 import com.example.ecommerceapp.domain.model.User
 import com.example.ecommerceapp.domain.remote.data_source.UsersRemoteDataSource
 import com.example.ecommerceapp.domain.repository.UserRepository
 import com.example.ecommerceapp.domain.use_case.user.LoginResult
 import com.example.ecommerceapp.domain.use_case.user.RegisterResult
-import com.example.ecommerceapp.domain.use_case.user.UpdateUserRequest
 import com.example.ecommerceapp.domain.use_case.user.UpdateUserResult
 import retrofit2.HttpException
 
@@ -41,6 +37,7 @@ class UserRepositoryImpl(
     override suspend fun login(email: String, password: String): LoginResult {
         return try {
             val user = remote.login(email, password)
+            local.logoutAllUsers()
             local.insertUser(user)
             local.setActiveUser(user.id)
             LoginResult.Success
@@ -81,6 +78,10 @@ class UserRepositoryImpl(
             Log.e("UpdateUser", "Error inesperado: ${e.message ?: "Desconocido"}")
             UpdateUserResult.Error("Error al actualizar el usuario: ${e.message ?: "Desconocido"}")
         }
+    }
+
+     override suspend fun logoutUser(userId: String): Boolean {
+        return local.logoutUser(userId)
     }
 
 }

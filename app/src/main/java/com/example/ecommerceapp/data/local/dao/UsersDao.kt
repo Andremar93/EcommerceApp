@@ -28,6 +28,9 @@ interface UsersDao {
     @Query("UPDATE users SET isLoggedIn = 0")
     suspend fun logoutAllUsers()
 
+    @Query("UPDATE users SET isLoggedIn = 0 WHERE id = :userId")
+    suspend fun logoutUserById(userId: String): Int
+
     @Query("UPDATE users SET isLoggedIn = 1 WHERE id = :userId")
     suspend fun setActiveUser(userId: String)
 

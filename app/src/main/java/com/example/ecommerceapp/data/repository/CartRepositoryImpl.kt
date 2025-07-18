@@ -15,8 +15,10 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import com.example.ecommerceapp.domain.repository.CartRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import javax.inject.Inject
 
-class CartRepositoryImpl(
+class CartRepositoryImpl @Inject constructor(
     private val cartDao: CartDao,
     private val productDao: ProductDao
 ) : CartRepository {
@@ -33,12 +35,16 @@ class CartRepositoryImpl(
             }
             .stateIn(scope = scope, started = SharingStarted.Eagerly, initialValue = emptyList())
     }
-
     override val cartItems: StateFlow<List<CartItem>> get() = _cartItems
+
+
+    override val cartItemCount: StateFlow<Int> =
+        cartDao.getCartItemCountFlow()
+            .map { it ?: 0 }
+            .stateIn(scope, SharingStarted.WhileSubscribed(5000), 0)
 
     override fun updateQuantity(productItem: ProductItem, quantity: Int) {
         scope.launch {
-            Log.d("UPDATE", "PRODUCT: $productItem, $quantity")
             val exists = cartDao.getCartItemByProductId(productItem.id)
             if (quantity > 0) {
                 if (exists != null) {
@@ -67,8 +73,19 @@ class CartRepositoryImpl(
 
     override fun addToCart(productItem: ProductItem, quantity: Int): Boolean {
         scope.launch {
-            cartDao.insertCartItem(CartItem(productItem, quantity).toEntity())
+            val existingItem = cartDao.getCartItemByProductId(productItem.id)
+            if (existingItem != null) {
+                val updatedItem = existingItem.copy(quantity = existingItem.quantity + quantity)
+                cartDao.updateCartItem(updatedItem)
+                return@launch
+            } else {
+                cartDao.insertCartItem(CartItem(productItem, quantity).toEntity())
+            }
         }
         return true
+    }
+
+    override suspend fun getCartItemCount(): Int {
+        return cartDao.getCartItemCount() ?: 0
     }
 }

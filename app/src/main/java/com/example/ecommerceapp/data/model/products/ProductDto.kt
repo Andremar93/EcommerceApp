@@ -1,6 +1,5 @@
-package com.example.ecommerceapp.data.model
+package com.example.ecommerceapp.data.model.products
 
-import com.example.ecommerceapp.domain.model.ProductItem
 import com.google.gson.annotations.SerializedName
 
 data class ProductDto(

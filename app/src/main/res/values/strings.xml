@@ -54,6 +54,88 @@
     <string name="home_cart">Carrito</string>
     <string name="home_profile">Perfil</string>
 
+    <!-- CartScreen -->
+    <string name="cart_summary_title">Resumen de la compra</string>
+    <string name="total_products">Total de productos: %1$d</string>
+    <string name="total_price">Total general: $%1$.2f</string>
+    <string name="top_bar_message">Tu Carrito</string>
+    <string name="clear_cart">Limpiar Carrito</string>
+    <string name="buy_cart">Comprar</string>
 
+    <!-- EmptyCartScreen -->
+    <string name="empty_cart_message">No hay productos en tu carrito</string>
+    <string name="go_to_shop">Ir a comprar</string>
+
+    <!-- ProductListScreen -->
+    <string name="product_added_to_cart">Producto %1$s agregado al carrito</string>
+    <string name="no_products_found">No se encontraron productos</string>
+
+    <!-- Errores -->
+    <string name="generic_error">Ocurrió un error inesperado</string>
+
+
+    <!-- UserScreen -->
+    <string name="user_profile_title">Perfil de Usuario</string>
+    <string name="updating_profile">Actualizando perfil...</string>
+    <string name="uploading_image">Subiendo imagen...</string>
+    <string name="no_image_description">Sin imagen</string>
+    <string name="profile_picture_description">Foto de perfil</string>
+    <string name="change_image">Cambiar imagen</string>
+    <string name="my_orders">Mis órdenes</string>
+    <string name="logout">Cerrar sesión</string>
+    <string name="first_name">Nombre</string>
+    <string name="last_name">Apellido</string>
+    <string name="nationality">Nacionalidad</string>
+    <string name="email">Email</string>
+    <string name="cancel">Cancelar</string>
+    <string name="edit_profile">Editar Perfil</string>
+    <string name="save">Guardar</string>
+    [
+    <!-- SettingsScreen -->
+    <string name="settings">Ajustes</string>
+    <string name="under_construction_title">Página en construcción</string>
+    <string name="under_construction_message">Estamos trabajando para traerte esta sección pronto.</string>
+    <string name="back_to_home">Volver al inicio</string>
+
+    <!-- OrdersScreen -->
+    <string name="loading_orders">Cargando órdenes…</string>
+    <string name="no_orders">No tienes órdenes.</string>
+    <string name="order_error">Error al cargar las órdenes: %1$s</string>
+    <string name="order_date">Fecha: %1$s</string>
+    <string name="order_products">Productos:</string>
+    <string name="order_item">• %1$s x%2$d - $%3$.2f</string>
+    <string name="order_total">Total: $%1$.2f</string>
+    <string name="order_id">#%1$s</string>
+
+    <!-- OrdersViewModel-->
+    <string name="error_invalid_email">El email no tiene un formato válido</string>
+    <string name="error_password_too_short">La contraseña debe tener al menos 8 caracteres</string>
+    <string name="error_fix_errors_before_continue">Corrige los errores antes de continuar</string>
+    <string name="error_all_fields_required">Todos los campos son obligatorios</string>
+
+    <!--  Loginscreen  -->
+    <string name="login_title">Inicio de Sesión</string>
+    <string name="login_email">Email</string>
+    <string name="login_password">Contraseña</string>
+    <string name="password_visibility_toggle">Mostrar u ocultar contraseña</string>
+    <string name="login_button">Iniciar sesión</string>
+    <string name="login_register_prompt">¿No tienes cuenta? Registrate ahora</string>
+    <string name="login_register_action">Registrarme</string>
+    <string name="login_loading">Cargando...</string>
+    <string name="login_success">¡Inicio de Sesión exitoso!</string>
+
+
+    <!-- RegisterScreen -->
+    <string name="register_title">Registrate</string>
+    <string name="register_name">Nombre</string>
+    <string name="register_last_name">Apellido</string>
+    <string name="register_nationality">Nacionalidad</string>
+    <string name="register_email">Email</string>
+    <string name="register_password">Contraseña</string>
+    <string name="register_confirm_password">Confirmar contraseña</string>
+    <string name="password_toggle_description">Mostrar u ocultar contraseña</string>
+    <string name="confirm_password_toggle_description">Mostrar u ocultar confirmación de contraseña</string>
+    <string name="register_button">Registrarme</string>
+    <string name="register_success">¡Registro exitoso!</string>
 
 </resources>

@@ -3,7 +3,7 @@ package com.example.ecommerceapp.data.remote.data_source
 import android.util.Log
 import com.example.ecommerceapp.data.local.mappers.toDomain
 import com.example.ecommerceapp.data.local.mappers.toDto
-import com.example.ecommerceapp.data.model.OrderRequestDto
+import com.example.ecommerceapp.data.model.orders.OrderCreateRequestDto
 import com.example.ecommerceapp.data.remote.OrdersApiService
 import com.example.ecommerceapp.domain.model.OrderItem
 import com.example.ecommerceapp.domain.model.OrderItemsItem
@@ -16,7 +16,7 @@ class OrdersRemoteDataSourceImpl @Inject constructor(
 ) : OrdersRemoteDataSource {
 
     override suspend fun createOrder(order: OrderItem, items: List<OrderItemsItem>): OrderItem {
-        val orderRequest = OrderRequestDto(
+        val orderRequest = OrderCreateRequestDto(
             userId = order.userId,
             productIds = items.map { it.toDto() },
             total = order.totalAmount,
@@ -25,7 +25,6 @@ class OrdersRemoteDataSourceImpl @Inject constructor(
         )
         return try {
             val createdOrderItem = ordersApiService.createOrder(orderRequest).toDomain()
-            Log.d("OrdersRepositoryImpl", "createOrderApi: $createdOrderItem")
             createdOrderItem
         } catch (e: HttpException) {
             val errorBody = e.response()?.errorBody()?.string()
@@ -37,11 +36,10 @@ class OrdersRemoteDataSourceImpl @Inject constructor(
         }
     }
 
-    override suspend fun getOrders(): List<OrderItem> {
+    override suspend fun getOrders(userId: String): List<OrderItem> {
         return try {
-            val orders = ordersApiService.getOrders()
+            val orders = ordersApiService.getOrders(userId)
                 .map { it.toDomain() }
-            Log.d("OrdersRepositoryImpl", "getOrdersApi: $orders")
             orders
         } catch (e: HttpException) {
             Log.e("OrdersRepositoryImpl", "Error fetching orders: ${e.message()}")

@@ -15,6 +15,12 @@ interface CartDao {
     @Query("SELECT * FROM cart_items")
     fun getAllCartItems(): Flow<List<CartEntity>>
 
+    @Query("SELECT SUM(quantity) FROM cart_items")
+    suspend fun getCartItemCount(): Int?
+
+    @Query("SELECT SUM(quantity) FROM cart_items")
+    fun getCartItemCountFlow(): Flow<Int?>
+
     @Query("SELECT * FROM cart_items WHERE productId = :productId LIMIT 1")
     suspend fun getCartItemByProductId(productId: String): CartEntity?
 

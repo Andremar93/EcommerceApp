@@ -17,12 +17,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.example.ecommerceapp.R
 import com.example.ecommerceapp.domain.model.OrderItem
 import com.example.ecommerceapp.presentation.view.components.UIState
 import com.example.ecommerceapp.presentation.view.components.layout.MainLayout
@@ -44,7 +45,7 @@ fun OrdersScreen(navController: NavHostController) {
 
     MainLayout(
         navController = navController,
-        topBarMessage = "Mis Ordenes",
+        topBarMessage = stringResource(id = R.string.my_orders),
         showTopBar = true,
         showBottomBar = true,
         mainContent = {
@@ -52,7 +53,7 @@ fun OrdersScreen(navController: NavHostController) {
                 is UIState.Loading -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(
-                            text = "Cargando órdenes...",
+                            text = stringResource(R.string.loading_orders),
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.padding(16.dp)
                         )
@@ -68,7 +69,7 @@ fun OrdersScreen(navController: NavHostController) {
                     val orders = state.data
                     if (orders.isEmpty()) {
                         Text(
-                            text = "No tienes órdenes.",
+                            text = stringResource(R.string.no_orders),
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.padding(16.dp)
                         )
@@ -87,7 +88,7 @@ fun OrdersScreen(navController: NavHostController) {
 
                 is UIState.Error -> {
                     Text(
-                        text = "Error al cargar las órdenes: ${(state as UIState.Error).message}",
+                        text = stringResource(R.string.order_error, state.message),
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.padding(16.dp)
                     )
@@ -120,22 +121,22 @@ fun OrderCard(orderItem: OrderItem) {
         ),
     ) {
         Column(Modifier.padding(16.dp)) {
-//            Text(
-//                text = "Orden #${order.id}",
-//                style = MaterialTheme.typography.titleMedium
-//            )
+            Text(
+                text = stringResource(R.string.order_id, order.orderId),
+                style = MaterialTheme.typography.titleMedium
+            )
 
-            Spacer(modifier = Modifier.padding(top = 4.dp))
+            Spacer(modifier = Modifier.padding(top = 5.dp))
 
             Text(
-                text = "Fecha: ${formatDate(order.date)}",
+                text = stringResource(R.string.order_date, formatDate(order.date)),
                 style = MaterialTheme.typography.bodySmall
             )
 
             Spacer(modifier = Modifier.padding(top = 8.dp))
 
             Text(
-                text = "Productos:",
+                text = stringResource(R.string.order_products),
                 style = MaterialTheme.typography.bodyMedium
             )
 
@@ -143,7 +144,12 @@ fun OrderCard(orderItem: OrderItem) {
 
             items.forEach { item ->
                 Text(
-                    text = "• ${item.productName} x${item.quantity} - $${item.price * item.quantity}",
+                    text = stringResource(
+                        R.string.order_item,
+                        item.productName,
+                        item.quantity,
+                        item.price * item.quantity
+                    ),
                     style = MaterialTheme.typography.bodySmall
                 )
             }
@@ -151,7 +157,7 @@ fun OrderCard(orderItem: OrderItem) {
             Spacer(modifier = Modifier.padding(top = 8.dp))
 
             Text(
-                text = "Total: $${order.totalAmount}",
+                text = stringResource(R.string.order_total, order.totalAmount),
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.align(Alignment.End)
             )

@@ -1,6 +1,5 @@
 package com.example.ecommerceapp.data.local.data_source
 
-import android.util.Log
 import com.example.ecommerceapp.data.local.dao.OrderDao
 import com.example.ecommerceapp.data.local.dao.OrderItemDao
 import com.example.ecommerceapp.data.local.mappers.toEntity

@@ -31,7 +31,6 @@ class RegisterViewModel @Inject constructor(
     var passwordConfirmationError by mutableStateOf<String?>(null)
     var generalError by mutableStateOf<String?>(null)
 
-    var isLoading by mutableStateOf(false)
     var isSuccess by mutableStateOf(false)
 
     val isFormValid: Boolean

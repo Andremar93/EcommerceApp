@@ -1,4 +1,4 @@
-package com.example.ecommerceapp.data.model
+package com.example.ecommerceapp.data.model.users
 
 import com.example.ecommerceapp.data.local.entity.UserEntity
 import com.example.ecommerceapp.domain.model.User

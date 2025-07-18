@@ -29,6 +29,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavHostController
 import com.example.ecommerceapp.presentation.view.components.ProductItemOnCart
 import com.example.ecommerceapp.presentation.view.components.layout.MainLayout
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import com.example.ecommerceapp.R
 
 @Composable
 fun CartScreen(
@@ -57,7 +60,7 @@ fun CartScreen(
     MainLayout(
         navController = navController,
         selectedItem = "cart",
-        topBarMessage = "Tu Carrito",
+        topBarMessage =  stringResource(id = R.string.buy_cart),
         mainContent = {
             if (totalProducts == 0) {
                 EmptyCartScreen(navController)
@@ -115,12 +118,12 @@ fun CartScreen(
                         ) {
                             Column(Modifier.padding(16.dp)) {
                                 Text(
-                                    "Resumen de la compra",
+                                    text = stringResource(id = R.string.cart_summary_title),
                                     style = MaterialTheme.typography.titleMedium
                                 )
                                 Spacer(Modifier.height(8.dp))
-                                Text("Total de productos: $totalProducts")
-                                Text("Total general: $${"%.2f".format(totalPrice)}")
+                                Text(stringResource(id = R.string.total_products, totalProducts))
+                                Text(stringResource(id = R.string.total_price, totalPrice))
                             }
                         }
 
@@ -130,18 +133,18 @@ fun CartScreen(
                                 .fillMaxWidth()
                                 .padding(16.dp)
                                 .align(Alignment.End),
-                            horizontalArrangement = Arrangement.Center,
+                            horizontalArrangement = Arrangement.SpaceAround,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Button(onClick = { cartViewModel.clearCart() }, modifier = Modifier) {
-                                Text("Limpiar Carrito")
+                                Text(text = stringResource(id = R.string.clear_cart))
                             }
 
                             Button(
                                 onClick = { cartViewModel.finalizeOrder() },
                                 modifier = Modifier
                             ) {
-                                Text("Comprar Carrito")
+                                Text(text = stringResource(id = R.string.buy_cart))
                             }
 
                         }
@@ -156,13 +159,13 @@ fun CartScreen(
 fun EmptyCartScreen(navController: NavHostController) {
     Box(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
+            .fillMaxSize(),
+//            .padding(16.dp),
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                text = "No hay productos en tu carrito"
+                text = stringResource(id = R.string.empty_cart_message)
             )
             Button(onClick = {
                 navController.navigate("products") {
@@ -174,9 +177,9 @@ fun EmptyCartScreen(navController: NavHostController) {
                 }
 
             }) {
-                Text("Ir a comprar")
+                Text(text = stringResource(id = R.string.go_to_shop))
             }
         }
-
     }
 }
+

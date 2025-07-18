@@ -15,6 +15,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import com.example.ecommerceapp.domain.use_case.cart.AddToCartUseCase
 import com.example.ecommerceapp.domain.use_case.product.GetProductsUseCase
 import com.example.ecommerceapp.presentation.view.components.UIState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,12 +26,11 @@ import retrofit2.HttpException
 @HiltViewModel
 class ProductListViewModel @Inject constructor(
     private val getProductsUseCase: GetProductsUseCase,
-    private val cartRepository: CartRepository
+    private val addToCartUseCase: AddToCartUseCase,
 ) : ViewModel() {
 
     var searchQuery by mutableStateOf("")
     var selectedCategory by mutableStateOf("Todas")
-    var sortAscending by mutableStateOf(true)
 
     private val _allCategories = MutableStateFlow<List<String>>(emptyList())
     val allCategories: StateFlow<List<String>> = _allCategories
@@ -59,13 +59,13 @@ class ProductListViewModel @Inject constructor(
             try {
 
                 val products = getProductsUseCase.invoke(refreshData)
+                allProductItems = products
 
                 _allCategories.value =
                     listOf("Todas") + allProductItems.flatMap { it.categories }.distinct()
 
                 applyFilters()
                 uiState = UIState.Success(products)
-                allProductItems = getProductsUseCase()
 
 
             } catch (e: IOException) {
@@ -87,8 +87,7 @@ class ProductListViewModel @Inject constructor(
     fun addToCart(productItem: ProductItem, quantity: Int) {
         viewModelScope.launch {
             addingProductId = productItem.id
-            delay(300)
-            if (cartRepository.addToCart(productItem, quantity)) {
+            if (addToCartUseCase.invoke(productItem, quantity)) {
                 _lastAddedProductItem.value = productItem
             }
         }

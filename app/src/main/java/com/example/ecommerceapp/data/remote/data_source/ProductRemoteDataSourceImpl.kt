@@ -1,6 +1,6 @@
 package com.example.ecommerceapp.data.remote.data_source
 
-import com.example.ecommerceapp.data.model.ProductDto
+import com.example.ecommerceapp.data.model.products.ProductDto
 import com.example.ecommerceapp.data.remote.ProductApiService
 import com.example.ecommerceapp.domain.remote.data_source.ProductRemoteDataSource
 import javax.inject.Inject

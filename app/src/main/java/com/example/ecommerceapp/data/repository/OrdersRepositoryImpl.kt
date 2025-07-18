@@ -2,15 +2,11 @@ package com.example.ecommerceapp.data.repository
 
 import retrofit2.HttpException
 import android.util.Log
-import com.example.ecommerceapp.data.local.mappers.toDomain
 import com.example.ecommerceapp.domain.model.OrderItem
-import com.example.ecommerceapp.data.local.mappers.toEntity
 import com.example.ecommerceapp.domain.local.data_source.OrdersLocalDataSource
 import com.example.ecommerceapp.domain.model.OrderItemsItem
 import com.example.ecommerceapp.domain.remote.data_source.OrdersRemoteDataSource
 import com.example.ecommerceapp.domain.repository.OrdersRepository
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 
 class OrdersRepositoryImpl(
     private val ordersRemoteDataSource: OrdersRemoteDataSource,
@@ -37,9 +33,9 @@ class OrdersRepositoryImpl(
         }
     }
 
-    override suspend fun getOrders(): List<OrderItem> {
+    override suspend fun getOrders(userId : String): List<OrderItem> {
         return try {
-            ordersRemoteDataSource.getOrders()
+            ordersRemoteDataSource.getOrders(userId)
         } catch (e: HttpException) {
             Log.e("OrdersRepository", "Error fetching orders: ${e.message()}")
             throw e

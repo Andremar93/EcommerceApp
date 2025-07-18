@@ -6,11 +6,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ecommerceapp.domain.model.OrderItem
-import com.example.ecommerceapp.domain.model.ProductItem
-import com.example.ecommerceapp.domain.repository.OrdersRepository
 import com.example.ecommerceapp.domain.use_case.order.GetOrdersUseCase
+import com.example.ecommerceapp.domain.use_case.user.GetActiveUserUseCase
 import com.example.ecommerceapp.presentation.view.components.UIState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -18,22 +16,21 @@ import retrofit2.HttpException
 import java.io.IOException
 import javax.inject.Inject
 
-
 @HiltViewModel
 class OrderViewModel @Inject constructor(
-    private val getOrdersUseCase: GetOrdersUseCase
+    private val getOrdersUseCase: GetOrdersUseCase,
+    private val getActiveUserUseCase: GetActiveUserUseCase
 ) : ViewModel() {
-
 
     var uiState by mutableStateOf<UIState<List<OrderItem>>>(UIState.Loading)
 
-    suspend fun getOrders() {
+    fun getOrders() {
         viewModelScope.launch {
-
             uiState = UIState.Loading
 
             try {
-                val orders = getOrdersUseCase.invoke()
+                val user = getActiveUserUseCase.invoke()
+                val orders = getOrdersUseCase.invoke(user.id)
                 uiState = UIState.Success(orders)
 
             } catch (e: IOException) {
@@ -51,6 +48,4 @@ class OrderViewModel @Inject constructor(
 
         }
     }
-
-
 }

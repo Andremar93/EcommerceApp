@@ -65,7 +65,6 @@ class LoginViewModel @Inject constructor(
                     isLoggedIn = true
                     errorMessage = null
                 }
-
                 is LoginResult.Error -> {
                     loginState = LoginState.Error(result.message)
                     isLoggedIn = false

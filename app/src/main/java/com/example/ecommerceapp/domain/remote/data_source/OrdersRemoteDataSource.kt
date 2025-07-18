@@ -12,6 +12,5 @@ interface OrdersRemoteDataSource {
         return orderItem
     }
 
-    suspend fun getOrders(
-    ): List<OrderItem>
+    suspend fun getOrders(userId: String): List<OrderItem>
 }

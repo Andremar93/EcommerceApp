@@ -1,7 +1,9 @@
 package com.example.ecommerceapp.presentation.view.views
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
+import com.example.ecommerceapp.R
 import com.example.ecommerceapp.presentation.view.components.UnderConstructionScreen
 import com.example.ecommerceapp.presentation.view.components.layout.MainLayout
 
@@ -11,16 +13,14 @@ fun SettingsScreen(navController: NavHostController) {
     MainLayout(
         navController = navController,
         selectedItem = "settings",
-        topBarMessage = "Settings",
+        topBarMessage = stringResource(id = R.string.settings),
         mainContent = {
             UnderConstructionScreen(
-                title = "Página en construcción",
-                message = "Estamos trabajando para traerte esta sección pronto.",
+                title = stringResource(id = R.string.under_construction_title),
+                message = stringResource(id = R.string.under_construction_message),
                 showButton = false,
-                buttonText = "Volver al inicio",
-//            onButtonClick: {}
+                buttonText = stringResource(id = R.string.back_to_home),
             )
-
         }
     )
 }

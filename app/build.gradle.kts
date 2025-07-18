@@ -87,6 +87,9 @@ dependencies {
     implementation(libs.androidx.navigation.testing.android)
     // OkHttp Logging Interceptor
     implementation(libs.logging.interceptor)
+    implementation(libs.androidx.hilt.common)
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.hilt.work)
     testImplementation(libs.junit)
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockito.kotlin)
@@ -103,8 +106,6 @@ dependencies {
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.navigation.compose)
     implementation(project(":feature:cart"))
-
-//    implementation("androidx.work.work-runtime-ktx:2.8.1")
 
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)

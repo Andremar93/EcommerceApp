@@ -25,11 +25,13 @@ import com.example.ecommerceapp.presentation.view.viewmodel.CartViewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavHostController
 import com.example.ecommerceapp.presentation.view.components.ProductItemOnCart
 import com.example.ecommerceapp.presentation.view.components.layout.MainLayout
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.ecommerceapp.R
 
@@ -39,38 +41,28 @@ fun CartScreen(
     navController: NavHostController,
     onCheckoutSuccess: () -> Unit
 ) {
-
     val cartViewModel: CartViewModel = hiltViewModel()
     val cartItems by cartViewModel.cartItems.collectAsState()
     val totalProducts by cartViewModel.totalProducts.collectAsState()
     val totalPrice by cartViewModel.totalPrice.collectAsState()
+    val checkoutSuccess = cartViewModel.checkoutSuccess
 
-    var checkoutSuccess = cartViewModel.checkoutSuccess
-
-    LaunchedEffect(Unit) {
-        cartViewModel.loadCart()
-    }
-
-    LaunchedEffect(checkoutSuccess) {
-        if (checkoutSuccess) {
-            onCheckoutSuccess()
-        }
-    }
+    LaunchedEffect(Unit) { cartViewModel.loadCart() }
+    LaunchedEffect(checkoutSuccess) { if (checkoutSuccess) onCheckoutSuccess() }
 
     MainLayout(
         navController = navController,
         selectedItem = "cart",
-        topBarMessage =  stringResource(id = R.string.buy_cart),
+        topBarMessage = stringResource(id = R.string.buy_cart),
         mainContent = {
             if (totalProducts == 0) {
                 EmptyCartScreen(navController)
             } else {
                 Column(
                     Modifier
-                        .padding(horizontal = 12.dp)
-                        .fillMaxSize(),
-                    verticalArrangement = Arrangement.SpaceBetween,
-                    horizontalAlignment = Alignment.CenterHorizontally
+                        .fillMaxSize()
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.SpaceBetween
                 ) {
                     LazyColumn(
                         modifier = Modifier
@@ -80,73 +72,70 @@ fun CartScreen(
                         items(cartItems) { cartItem ->
                             ProductItemOnCart(
                                 cartItem = cartItem,
-                                onIncrease = {
-                                    cartViewModel.increaseQuantity(
-                                        cartItem.productItem,
-                                    )
-                                },
-                                onDecrease = {
-                                    cartViewModel.decreaseQuantity(
-                                        cartItem.productItem,
-                                    )
-                                },
+                                onIncrease = { cartViewModel.increaseQuantity(cartItem.productItem) },
+                                onDecrease = { cartViewModel.decreaseQuantity(cartItem.productItem) },
                                 isDeleting = false,
                                 onDeleteProduct = { cartViewModel.removeFromCart(cartItem.productItem) }
                             )
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(10.dp))
                         }
                     }
 
-                    Column {
-                        Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp)
-                                .border(
-                                    width = 1.dp,
-                                    color = MaterialTheme.colorScheme.outline,
-                                    shape = MaterialTheme.shapes.medium
-                                ),
-                            elevation = CardDefaults.cardElevation(4.dp),
-                            shape = MaterialTheme.shapes.medium,
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.surface,
-                                contentColor = MaterialTheme.colorScheme.onSurface
-                            ),
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 4.dp),
+                        elevation = CardDefaults.cardElevation(4.dp),
+                        shape = MaterialTheme.shapes.medium,
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                            contentColor = MaterialTheme.colorScheme.onSurface
+                        )
+                    ) {
+                        Column(Modifier.padding(16.dp)) {
+                            Text(
+                                text = stringResource(id = R.string.cart_summary_title),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Medium,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Spacer(Modifier.height(10.dp))
+                            Text(
+                                text = stringResource(id = R.string.total_products, totalProducts),
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                            Text(
+                                text = stringResource(id = R.string.total_price, totalPrice),
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        FilledTonalButton(
+                            onClick = { cartViewModel.clearCart() },
+                            modifier = Modifier.weight(1f),
+                            shape = MaterialTheme.shapes.medium
                         ) {
-                            Column(Modifier.padding(16.dp)) {
-                                Text(
-                                    text = stringResource(id = R.string.cart_summary_title),
-                                    style = MaterialTheme.typography.titleMedium
-                                )
-                                Spacer(Modifier.height(8.dp))
-                                Text(stringResource(id = R.string.total_products, totalProducts))
-                                Text(stringResource(id = R.string.total_price, totalPrice))
-                            }
+                            Text(text = stringResource(id = R.string.clear_cart))
                         }
 
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp)
-                                .align(Alignment.End),
-                            horizontalArrangement = Arrangement.SpaceAround,
-                            verticalAlignment = Alignment.CenterVertically
+                        Button(
+                            onClick = { cartViewModel.finalizeOrder() },
+                            modifier = Modifier.weight(1f),
+                            shape = MaterialTheme.shapes.medium
                         ) {
-                            Button(onClick = { cartViewModel.clearCart() }, modifier = Modifier) {
-                                Text(text = stringResource(id = R.string.clear_cart))
-                            }
-
-                            Button(
-                                onClick = { cartViewModel.finalizeOrder() },
-                                modifier = Modifier
-                            ) {
-                                Text(text = stringResource(id = R.string.buy_cart))
-                            }
-
+                            Text(text = stringResource(id = R.string.buy_cart))
                         }
                     }
                 }
@@ -158,28 +147,32 @@ fun CartScreen(
 @Composable
 fun EmptyCartScreen(navController: NavHostController) {
     Box(
-        modifier = Modifier
-            .fillMaxSize(),
-//            .padding(16.dp),
+        modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                text = stringResource(id = R.string.empty_cart_message)
+                text = stringResource(id = R.string.empty_cart_message),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            Button(onClick = {
-                navController.navigate("products") {
-                    launchSingleTop = true
-                    restoreState = true
-                    popUpTo(navController.graph.startDestinationId) {
-                        saveState = true
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(
+                onClick = {
+                    navController.navigate("products") {
+                        launchSingleTop = true
+                        restoreState = true
+                        popUpTo(navController.graph.startDestinationId) {
+                            saveState = true
+                        }
                     }
-                }
-
-            }) {
+                },
+                shape = MaterialTheme.shapes.medium
+            ) {
                 Text(text = stringResource(id = R.string.go_to_shop))
             }
         }
     }
 }
+
 

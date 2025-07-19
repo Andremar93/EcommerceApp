@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -17,6 +18,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -106,7 +108,6 @@ fun RegisterScreenContent(
     ) {
     var passwordVisible by remember { mutableStateOf(false) }
     var confirmPasswordVisible by remember { mutableStateOf(false) }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -118,70 +119,52 @@ fun RegisterScreenContent(
         Text(
             text = stringResource(R.string.register_title),
             style = MaterialTheme.typography.headlineLarge,
-            color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Bold,
-            letterSpacing = 0.5.sp,
-            maxLines = 1
+            color = MaterialTheme.colorScheme.primary
         )
-        Spacer(Modifier.height(10.dp))
 
-        OutlinedTextField(
-            value = name,
-            onValueChange = onNameChange,
-            label = { Text(stringResource(R.string.register_name)) })
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(16.dp))
 
-        OutlinedTextField(
-            value = lastName,
-            onValueChange = onLastNameChange,
-            label = { Text(stringResource(R.string.register_last_name)) })
-        Spacer(Modifier.height(8.dp))
-
-        OutlinedTextField(
-            value = nationality,
-            onValueChange = onNationalityChange,
-            label = { Text(stringResource(R.string.register_nationality)) })
-        Spacer(Modifier.height(8.dp))
-
-        OutlinedTextField(
-            value = email,
-            onValueChange = onEmailChange,
-            label = { Text(stringResource(R.string.register_email)) },
-            isError = emailError != null
-        )
-        emailError?.let {
-            Text(
-                text = it,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodySmall
+        listOf(
+            Triple(name, onNameChange, R.string.register_name),
+            Triple(lastName, onLastNameChange, R.string.register_last_name),
+            Triple(nationality, onNationalityChange, R.string.register_nationality),
+            Triple(email, onEmailChange, R.string.register_email)
+        ).forEach { (value, onChange, labelId) ->
+            OutlinedTextField(
+                value = value,
+                onValueChange = onChange,
+                label = { Text(stringResource(labelId)) },
+                shape = MaterialTheme.shapes.medium,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant
+                ),
+                modifier = Modifier.fillMaxWidth()
             )
+            Spacer(Modifier.height(8.dp))
         }
 
-        Spacer(Modifier.height(8.dp))
+        emailError?.let {
+            Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+        }
 
         OutlinedTextField(
             value = password,
             onValueChange = onPasswordChange,
             label = { Text(stringResource(R.string.register_password)) },
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            isError = passwordError != null,
             trailingIcon = {
-                val icon =
-                    if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff
+                val icon = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff
                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = stringResource(R.string.password_toggle_description)
-                    )
+                    Icon(icon, contentDescription = null)
                 }
-            }
+            },
+            isError = passwordError != null,
+            shape = MaterialTheme.shapes.medium
         )
         passwordError?.let {
-            Text(
-                text = it,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodySmall
-            )
+            Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
         }
 
         Spacer(Modifier.height(8.dp))
@@ -191,32 +174,25 @@ fun RegisterScreenContent(
             onValueChange = onConfirmPasswordChange,
             label = { Text(stringResource(R.string.register_confirm_password)) },
             visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            isError = confirmPasswordError != null,
             trailingIcon = {
-                val icon =
-                    if (confirmPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff
+                val icon = if (confirmPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff
                 IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = stringResource(R.string.confirm_password_toggle_description)
-                    )
+                    Icon(icon, contentDescription = null)
                 }
-            }
+            },
+            isError = confirmPasswordError != null,
+            shape = MaterialTheme.shapes.medium
         )
         confirmPasswordError?.let {
-            Text(
-                text = it,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodySmall
-            )
+            Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
         }
 
         Spacer(Modifier.height(16.dp))
 
-
         Button(
             onClick = onRegisterClick,
-            enabled = isFormValid && registerState !is RegisterState.Loading
+            enabled = isFormValid && registerState !is RegisterState.Loading,
+            shape = MaterialTheme.shapes.medium
         ) {
             if (registerState is RegisterState.Loading) {
                 CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
@@ -226,23 +202,15 @@ fun RegisterScreenContent(
         }
 
         if (registerState is RegisterState.Error) {
-            Text(
-                text = registerState.message,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodySmall
-            )
             Spacer(modifier = Modifier.height(8.dp))
+            Text(registerState.message, color = MaterialTheme.colorScheme.error)
         }
-
 
         if (registerState is RegisterState.Success) {
-            Text(
-                stringResource(R.string.register_success),
-                color = MaterialTheme.colorScheme.primary
-            )
+            Text(stringResource(R.string.register_success), color = MaterialTheme.colorScheme.primary)
         }
-
     }
+
 }
 
 

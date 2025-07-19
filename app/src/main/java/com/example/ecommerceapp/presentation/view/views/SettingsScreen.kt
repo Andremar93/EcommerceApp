@@ -9,7 +9,6 @@ import com.example.ecommerceapp.presentation.view.components.layout.MainLayout
 
 @Composable
 fun SettingsScreen(navController: NavHostController) {
-
     MainLayout(
         navController = navController,
         selectedItem = "settings",
@@ -18,8 +17,17 @@ fun SettingsScreen(navController: NavHostController) {
             UnderConstructionScreen(
                 title = stringResource(id = R.string.under_construction_title),
                 message = stringResource(id = R.string.under_construction_message),
-                showButton = false,
+                showButton = true,
                 buttonText = stringResource(id = R.string.back_to_home),
+                onButtonClick = {
+                    navController.navigate("products") {
+                        popUpTo(navController.graph.startDestinationId) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
             )
         }
     )

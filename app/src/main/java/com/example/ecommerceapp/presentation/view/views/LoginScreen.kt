@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -15,6 +16,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -46,121 +49,125 @@ fun LoginScreen(
     val isLoggedIn = viewModel.isLoggedIn
     var passwordVisible by remember { mutableStateOf(false) }
 
-    val invalidEmailError = stringResource(R.string.error_invalid_email)
-    val passwordTooShortError = stringResource(R.string.error_password_too_short)
-    val fixErrorsMessage = stringResource(R.string.error_fix_errors_before_continue)
-    val allFieldsRequiredMessage = stringResource(R.string.error_all_fields_required)
-
     LaunchedEffect(isLoggedIn) {
         if (isLoggedIn) {
             onLoginSuccess()
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
     ) {
-
-        Text(
-            text = stringResource(R.string.login_title),
-            style = MaterialTheme.typography.headlineLarge,
-            color = MaterialTheme.colorScheme.primary,
-            fontWeight = FontWeight.Bold,
-            letterSpacing = 0.5.sp,
-            maxLines = 1
-        )
-
-        OutlinedTextField(
-            value = viewModel.email,
-            onValueChange = {
-                viewModel.email = it
-                viewModel.validateFields()
-            },
-            label = { Text(stringResource(R.string.login_email)) },
-            isError = viewModel.emailError != null
-        )
-        viewModel.emailError?.let {
-            Text(
-                text = it,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodySmall
-            )
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        OutlinedTextField(
-            value = viewModel.password,
-            onValueChange = {
-                viewModel.password = it
-                viewModel.validateFields()
-            },
-            label = { Text(stringResource(R.string.login_password)) },
-            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            isError = viewModel.passwordError != null,
-            trailingIcon = {
-                val image = if (passwordVisible)
-                    Icons.Filled.Visibility
-                else
-                    Icons.Filled.VisibilityOff
-
-                IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                    Icon(
-                        imageVector = image,
-                        contentDescription = stringResource(R.string.password_visibility_toggle)
-                    )
-                }
-            }
-        )
-        viewModel.passwordError?.let {
-            Text(
-                text = it,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodySmall
-            )
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(
-            onClick = { viewModel.onLoginClicked() },
-            enabled = viewModel.isFormValid
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(stringResource(R.string.login_button))
-        }
 
-        Spacer(modifier = Modifier.height(8.dp))
-
-        TextButton(onClick = {
-            navController.navigate("register")
-        }) {
-            Text(stringResource(R.string.login_register_prompt))
-        }
-
-        val state = viewModel.loginState
-
-        when (state) {
-            is LoginViewModel.LoginState.Loading -> CircularProgressIndicator()
-            is LoginViewModel.LoginState.Error -> Text(
-                state.message,
+            Text(
+                text = stringResource(R.string.login_title),
+                style = MaterialTheme.typography.headlineLarge,
+                fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary
             )
 
-            is LoginViewModel.LoginState.Success -> Text(
-                stringResource(R.string.login_success),
-                color = MaterialTheme.colorScheme.primary
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedTextField(
+                value = viewModel.email,
+                onValueChange = {
+                    viewModel.email = it
+                    viewModel.validateFields()
+                },
+                label = { Text(stringResource(R.string.login_email)) },
+                isError = viewModel.emailError != null,
+                shape = MaterialTheme.shapes.medium,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                    cursorColor = MaterialTheme.colorScheme.primary
+                )
             )
+            viewModel.emailError?.let {
+                Text(
+                    text = it,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
 
-            else -> {}
+            Spacer(modifier = Modifier.height(8.dp))
+
+            OutlinedTextField(
+                value = viewModel.password,
+                onValueChange = {
+                    viewModel.password = it
+                    viewModel.validateFields()
+                },
+                label = { Text(stringResource(R.string.login_password)) },
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                trailingIcon = {
+                    val icon = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(icon, contentDescription = null)
+                    }
+                },
+                isError = viewModel.passwordError != null,
+                shape = MaterialTheme.shapes.medium,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                    cursorColor = MaterialTheme.colorScheme.primary
+                )
+            )
+            viewModel.passwordError?.let {
+                Text(
+                    text = it,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = { viewModel.onLoginClicked() },
+                enabled = viewModel.isFormValid,
+                shape = MaterialTheme.shapes.medium
+            ) {
+                Text(stringResource(R.string.login_button))
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            TextButton(onClick = { navController.navigate("register") }) {
+                Text(
+                    text = stringResource(R.string.login_register_prompt),
+                    style = MaterialTheme.typography.labelLarge
+                )
+            }
+
+            val state = viewModel.loginState
+            when (state) {
+                is LoginViewModel.LoginState.Loading -> {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                }
+                is LoginViewModel.LoginState.Error -> {
+                    Text(state.message, color = MaterialTheme.colorScheme.error)
+                }
+                is LoginViewModel.LoginState.Success -> {
+                    Text(stringResource(R.string.login_success), color = MaterialTheme.colorScheme.primary)
+                }
+                else -> {}
+            }
         }
-
     }
-
 }
+
 
 
 @Preview(showBackground = true)

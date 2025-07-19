@@ -29,7 +29,7 @@ object Routes {
 fun AppNavigation(navController: NavHostController) {
 
 
-    NavHost(navController = navController, startDestination = Routes.LOGIN) {
+    NavHost(navController = navController, startDestination = Routes.SPLASH) {
 
         composable(Routes.SPLASH) {
             SplashScreen(navController)

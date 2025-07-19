@@ -8,7 +8,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.example.ecommerceapp.R
 
-
 private val Montserrat = FontFamily(
     Font(R.font.montserrat_light, FontWeight.Light),
     Font(R.font.montserrat_regular, FontWeight.Normal),
@@ -22,9 +21,9 @@ private val Karla = FontFamily(
     Font(R.font.karla_bold, FontWeight.Bold),
 )
 
-val Typography = Typography(
+val AppTypography = Typography(
     displayLarge = TextStyle(
-        fontFamily = com.example.ecommerceapp.ui.theme.Montserrat,
+        fontFamily = Montserrat,
         fontSize = 96.sp,
         fontWeight = FontWeight.Light,
         lineHeight = 117.sp,

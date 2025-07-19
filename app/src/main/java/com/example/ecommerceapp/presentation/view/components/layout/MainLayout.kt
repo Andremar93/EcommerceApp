@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ReceiptLong
+import androidx.compose.material.icons.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
@@ -31,6 +33,7 @@ fun MainLayout(
         Triple(stringResource(R.string.home_feed), Icons.Filled.Home, "products"),
         Triple(stringResource(R.string.home_cart), Icons.Filled.ShoppingCart, "cart"),
         Triple(stringResource(R.string.home_profile), Icons.Filled.Person, "profile"),
+        Triple(stringResource(R.string.home_orders), Icons.AutoMirrored.Filled.ReceiptLong, "orders"),
         Triple(stringResource(R.string.home_settings), Icons.Filled.Settings, "settings"),
     )
 
@@ -62,6 +65,7 @@ fun MainLayoutPreview() {
         Triple("Home", Icons.Filled.Home, "products"),
         Triple("Cart", Icons.Filled.ShoppingCart, "cart"),
         Triple("Profile", Icons.Filled.Person, "profile"),
+        Triple("Orders", Icons.Filled.ReceiptLong, "orders"),
         Triple("Settings", Icons.Filled.Settings, "settings")
     )
 

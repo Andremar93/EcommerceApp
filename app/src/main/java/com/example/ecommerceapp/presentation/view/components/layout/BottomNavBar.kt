@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.ecommerceapp.presentation.view.viewmodel.CartViewModel
 
@@ -28,58 +29,24 @@ fun BottomNavBar(
     selectedItem: String,
     navController: NavHostController,
 ) {
-
     val cartViewModel: CartViewModel = hiltViewModel()
     val cartItemCount by cartViewModel.cartItemCount.collectAsState()
 
+    val shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+
     NavigationBar(
-        containerColor = MaterialTheme.colorScheme.surface,
-        contentColor = MaterialTheme.colorScheme.primary,
-        tonalElevation = 6.dp,
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        tonalElevation = 4.dp,
         modifier = Modifier
-            .shadow(
-                elevation = 8.dp,
-                shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
-            )
-            .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+            .shadow(8.dp, shape = shape)
+            .clip(shape)
     ) {
-        navigationItems.forEachIndexed { index, (label, icon, route) ->
+        navigationItems.forEach { (label, icon, route) ->
             val selected = route == selectedItem
+            val isCartRoute = route == "cart"
+
             NavigationBarItem(
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    selectedTextColor = MaterialTheme.colorScheme.primary,
-                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    indicatorColor = MaterialTheme.colorScheme.surfaceVariant
-                ),
-                icon = {
-                    val isCartRoute = route == "cart"
-                    if (isCartRoute && cartItemCount > 0) {
-                        BadgedBox(
-                            badge = {
-                                Badge(containerColor = MaterialTheme.colorScheme.onSurfaceVariant) {
-                                    Text(
-                                        text = cartItemCount.toString(),
-                                        style = MaterialTheme.typography.labelSmall
-                                    )
-                                }
-                            }
-                        ) {
-                            Icon(icon, contentDescription = label)
-                        }
-                    } else {
-                        Icon(icon, contentDescription = label)
-                    }
-                },
-                label = {
-                    Text(
-                        text = label,
-                        style = MaterialTheme.typography.labelMedium.copy(
-                            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
-                        )
-                    )
-                },
                 selected = selected,
                 onClick = {
                     navController.navigate(route) {
@@ -89,7 +56,69 @@ fun BottomNavBar(
                             saveState = true
                         }
                     }
-                }
+                },
+                icon = {
+                    if (isCartRoute && cartItemCount > 0) {
+                        BadgedBox(
+                            badge = {
+                                val badgeColor = if (selected) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.secondary
+                                }
+
+                                val badgeTextColor = if (selected) {
+                                    MaterialTheme.colorScheme.onPrimary
+                                } else {
+                                    MaterialTheme.colorScheme.onSecondary
+                                }
+
+                                Badge(
+                                    containerColor = badgeColor
+                                ) {
+                                    Text(
+                                        text = cartItemCount.toString(),
+                                        color = badgeTextColor,
+                                        style = MaterialTheme.typography.labelSmall
+                                    )
+                                }
+                            }
+                        ) {
+                            Icon(
+                                imageVector = icon,
+                                contentDescription = label,
+                                tint = if (selected)
+                                    MaterialTheme.colorScheme.primary
+                                else
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    } else {
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = label,
+                            tint = if (selected)
+                                MaterialTheme.colorScheme.primary
+                            else
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                },
+                label = {
+                    Text(
+                        text = label,
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+                            color = if (selected)
+                                MaterialTheme.colorScheme.primary
+                            else
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    )
+                },
+                colors = NavigationBarItemDefaults.colors(
+                    indicatorColor = MaterialTheme.colorScheme.secondaryContainer,
+                )
             )
         }
     }

@@ -9,53 +9,32 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.Modifier
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.unit.dp
-import com.example.ecommerceapp.domain.model.User
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavHostController
-import coil.compose.AsyncImage
-import com.example.ecommerceapp.presentation.view.components.layout.MainLayout
-import com.example.ecommerceapp.presentation.view.viewmodel.UserViewModel
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.mapSaver
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
+import coil.compose.AsyncImage
 import com.example.ecommerceapp.R
+import com.example.ecommerceapp.domain.model.User
+import com.example.ecommerceapp.presentation.view.components.layout.MainLayout
+import com.example.ecommerceapp.presentation.view.viewmodel.UserViewModel
 
 @Composable
 fun UserScreen(
@@ -81,12 +60,110 @@ fun UserScreenContent(
     userViewModel: UserViewModel,
     navController: NavHostController,
 ) {
-
     val user by userViewModel.user.collectAsState()
     var selectedImageUri by rememberSaveable { mutableStateOf<Uri?>(null) }
     var isEditable by rememberSaveable { mutableStateOf(false) }
     val isUpdatingUser by userViewModel.isUpdatingUser.collectAsState()
     val navigateToLogin by userViewModel.navigateToLogin.collectAsState()
+
+    val context = LocalContext.current
+
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        selectedImageUri = uri
+        if (uri != null) {
+            userViewModel.uploadImage(uri)
+        }
+    }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            launcher.launch("image/*")
+        } else {
+
+//            val finalGranted = ContextCompat.checkSelfPermission(context, imagePermission) == PackageManager.PERMISSION_GRANTED
+//            if (finalGranted) {
+//                launcher.launch("image/*")
+//            } else {
+//            }
+            Toast.makeText(
+                context,
+                context.getString(R.string.profile_files_permission),
+                Toast.LENGTH_LONG
+            ).show()
+
+        }
+    }
+
+    val imagePermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        Manifest.permission.READ_MEDIA_IMAGES
+    } else {
+        Manifest.permission.READ_EXTERNAL_STORAGE
+    }
+
+    LaunchedEffect(navigateToLogin) {
+        if (navigateToLogin) {
+            navController.navigate("login") {
+                popUpTo(0) { inclusive = true }
+            }
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        userViewModel.loadUser()
+    }
+
+    val scrollState = rememberScrollState()
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(scrollState)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+
+        UserAvatarEditable(
+            avatarUrl = user.avatar,
+            isEditable = isEditable,
+            userViewModel = userViewModel,
+            onImageClick = {
+                if (ContextCompat.checkSelfPermission(
+                        context,
+                        imagePermission
+                    ) == PackageManager.PERMISSION_GRANTED
+                ) {
+                    launcher.launch("image/*")
+                } else {
+                    permissionLauncher.launch(imagePermission)
+                }
+            }
+        )
+
+        UserProfileFields(
+            user = user,
+            userViewModel = userViewModel,
+            isEditable = isEditable,
+            onEditableChange = { isEditable = it })
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            PrimaryButton(stringResource(id = R.string.my_orders)) {
+                navController.navigate("orders") {
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            }
+
+            PrimaryButton(stringResource(id = R.string.logout)) {
+                userViewModel.logoutUser()
+            }
+        }
+    }
 
     if (isUpdatingUser) {
         AlertDialog(
@@ -110,83 +187,6 @@ fun UserScreenContent(
             }
         )
     }
-
-
-    LaunchedEffect(navigateToLogin) {
-        if (navigateToLogin) {
-            navController.navigate("login") {
-                popUpTo(0) { inclusive = true }
-            }
-        }
-    }
-
-
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        selectedImageUri = uri
-        if (uri != null) {
-            userViewModel.uploadImage(uri)
-        }
-    }
-
-    var wantToPickImage by remember { mutableStateOf(false) }
-
-    RequestImagePermission(
-        onGranted = {
-            if (wantToPickImage) {
-                launcher.launch("image/*")
-                wantToPickImage = false
-            }
-        }
-    )
-
-    LaunchedEffect(Unit) {
-        userViewModel.loadUser()
-    }
-
-    val scrollState = rememberScrollState()
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(scrollState)
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-
-        UserAvatarEditable(
-            avatarUrl = user.avatar,
-            userViewModel,
-            isEditable = isEditable,
-            onImageClick = { wantToPickImage = true }
-        )
-
-
-        UserProfileFields(
-            user = user,
-            userViewModel = userViewModel,
-            isEditable = isEditable,
-            onEditableChange = { isEditable = it })
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-
-            PrimaryButton(stringResource(id = R.string.my_orders)) {
-                navController.navigate("orders") {
-                    launchSingleTop = true
-                    restoreState = true
-                }
-            }
-
-
-            PrimaryButton(stringResource(id = R.string.logout)) {
-                userViewModel.logoutUser()
-            }
-        }
-
-    }
 }
 
 @Composable
@@ -202,8 +202,7 @@ fun UserAvatarEditable(
         val avatarModifier = Modifier
             .size(120.dp)
             .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.surface)
-            .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
+            .background(MaterialTheme.colorScheme.surfaceContainerHighest)
 
         if (isImageUploading) {
             AlertDialog(
@@ -215,18 +214,15 @@ fun UserAvatarEditable(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(50.dp),
-                            color = MaterialTheme.colorScheme.primary,
-                            strokeWidth = 4.dp
+                            color = MaterialTheme.colorScheme.primary
                         )
                     }
-                },
-
-                )
+                }
+            )
         }
 
         if (avatarUrl.isNullOrBlank()) {
@@ -248,11 +244,16 @@ fun UserAvatarEditable(
         Spacer(modifier = Modifier.height(8.dp))
 
         if (isEditable) {
-            PrimaryButton(text = stringResource(id = R.string.change_image), onClick = onImageClick)
+            FilledTonalButton(
+                onClick = onImageClick,
+                shape = MaterialTheme.shapes.medium
+            ) {
+                Text(stringResource(id = R.string.change_image))
+            }
         }
-
     }
 }
+
 
 val UserSaver: Saver<User, *> = mapSaver(
     save = {
@@ -275,7 +276,6 @@ val UserSaver: Saver<User, *> = mapSaver(
     }
 )
 
-
 @Composable
 fun UserProfileFields(
     user: User,
@@ -283,7 +283,6 @@ fun UserProfileFields(
     isEditable: Boolean,
     onEditableChange: (Boolean) -> Unit
 ) {
-
     var name by rememberSaveable(user.name) { mutableStateOf(user.name) }
     var lastName by rememberSaveable(user.lastName) { mutableStateOf(user.lastName) }
     var nationality by rememberSaveable(user.nationality) { mutableStateOf(user.nationality) }
@@ -303,40 +302,47 @@ fun UserProfileFields(
         ) { nationality = it }
         ProfileField(stringResource(id = R.string.email), email, isEditable) { email = it }
 
-
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            PrimaryButton(
-                if (isEditable) stringResource(id = R.string.cancel) else stringResource(
-                    id = R.string.edit_profile
-                )
+            FilledTonalButton(
+                onClick = {
+                    if (isEditable) {
+                        name = originalUser.name
+                        lastName = originalUser.lastName
+                        nationality = originalUser.nationality
+                        email = originalUser.email
+                        onEditableChange(false)
+                    } else {
+                        originalUser = user
+                        onEditableChange(true)
+                    }
+                },
+                shape = MaterialTheme.shapes.medium
             ) {
-                if (isEditable) {
-                    name = originalUser.name
-                    lastName = originalUser.lastName
-                    nationality = originalUser.nationality
-                    email = originalUser.email
-                    onEditableChange(false)
-                } else {
-                    originalUser = user
-                    onEditableChange(true)
-                }
+                Text(
+                    if (isEditable) stringResource(id = R.string.cancel)
+                    else stringResource(id = R.string.edit_profile)
+                )
             }
 
             if (isEditable) {
-                PrimaryButton(stringResource(id = R.string.save)) {
-                    val updatedUser = user.copy(
-                        name = name,
-                        lastName = lastName,
-                        nationality = nationality,
-                        email = email
-                    )
-                    userViewModel.updateUser(updatedUser)
-                    onEditableChange(false)
-                }
+                PrimaryButton(
+                    text = stringResource(id = R.string.save),
+                    onClick = {
+                        val updatedUser = user.copy(
+                            name = name,
+                            lastName = lastName,
+                            nationality = nationality,
+                            email = email
+                        )
+                        userViewModel.updateUser(updatedUser)
+                        onEditableChange(false)
+                    }
+                )
             }
         }
     }
 }
+
 
 @Composable
 fun ProfileField(
@@ -353,54 +359,34 @@ fun ProfileField(
         singleLine = true,
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = 56.dp)
+            .heightIn(min = 56.dp),
+        shape = MaterialTheme.shapes.medium,
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = MaterialTheme.colorScheme.primary,
+            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+            cursorColor = MaterialTheme.colorScheme.primary
+        )
     )
 }
+
 
 @Composable
 fun PrimaryButton(text: String, onClick: () -> Unit) {
     Button(
         onClick = onClick,
         shape = MaterialTheme.shapes.medium,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary
+        ),
         modifier = Modifier
+            .height(48.dp)
             .padding(vertical = 4.dp)
     ) {
-        Text(text)
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelLarge
+        )
     }
 }
-
-
-@Composable
-fun RequestImagePermission(
-    onGranted: () -> Unit
-) {
-    val context = LocalContext.current
-    val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        Manifest.permission.READ_MEDIA_IMAGES
-    } else {
-        Manifest.permission.READ_EXTERNAL_STORAGE
-    }
-
-    val permissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted) {
-            onGranted()
-        } else {
-            Toast.makeText(
-                context,
-                context.getString(R.string.profile_files_permission),
-                Toast.LENGTH_LONG
-            ).show()
-        }
-    }
-
-    LaunchedEffect(Unit) {
-        when (PackageManager.PERMISSION_GRANTED) {
-            ContextCompat.checkSelfPermission(context, permission) -> onGranted()
-            else -> permissionLauncher.launch(permission)
-        }
-    }
-}
-
 

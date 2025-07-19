@@ -42,7 +42,10 @@ fun ProductItemOnCart(
         Column(modifier = Modifier.padding(16.dp)) {
 
             Text(text = cartItem.productItem.name, style = MaterialTheme.typography.titleLarge)
-            Text(text = cartItem.productItem.description, style = MaterialTheme.typography.bodyMedium)
+            Text(
+                text = cartItem.productItem.description,
+                style = MaterialTheme.typography.bodyMedium
+            )
             Text(
                 text = "Precio: $${cartItem.productItem.price}",
                 style = MaterialTheme.typography.bodyMedium
@@ -51,14 +54,8 @@ fun ProductItemOnCart(
             if (cartItem.productItem.hasDrink) {
                 Spacer(modifier = Modifier.width(8.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Filled.LocalDrink,
-                        contentDescription = "Con bebida",
-                        tint = MaterialTheme.colorScheme.secondary
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "+ bebida",
+                        text = "con bebida",
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.secondary
                     )
@@ -66,28 +63,28 @@ fun ProductItemOnCart(
             }
 
 
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(top = 8.dp)
-                ) {
-                    IconButton(onClick = onDecrease) {
-                        Icon(Icons.Filled.Remove, contentDescription = "Disminuir")
-                    }
-                    Text("${cartItem.quantity}", style = MaterialTheme.typography.bodyLarge)
-                    IconButton(onClick = onIncrease) {
-                        Icon(Icons.Filled.Add, contentDescription = "Aumentar")
-                    }
-
-                    Spacer(modifier = Modifier.weight(1f))
-
-                    IconButton(
-                        onClick = onDeleteProduct,
-                        enabled = !isDeleting
-                    ) {
-                        Icon(Icons.Filled.Delete, contentDescription = "Eliminar")
-                    }
-
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(top = 8.dp)
+            ) {
+                IconButton(onClick = onDecrease) {
+                    Icon(Icons.Filled.Remove, contentDescription = "Disminuir")
                 }
+                Text("${cartItem.quantity}", style = MaterialTheme.typography.bodyLarge)
+                IconButton(onClick = onIncrease) {
+                    Icon(Icons.Filled.Add, contentDescription = "Aumentar")
+                }
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                IconButton(
+                    onClick = onDeleteProduct,
+                    enabled = !isDeleting
+                ) {
+                    Icon(Icons.Filled.Delete, contentDescription = "Eliminar")
+                }
+
             }
         }
     }
+}

@@ -26,7 +26,7 @@ class ProductSyncWorker @AssistedInject constructor(
                 ProductSyncWorkerEntryPoint::class.java
             )
             val getProductsUseCase = entryPoint.getProductsUseCase()
-            Log.d("ProductSyncWorker", "Llamando a getporudctUseCase...")
+            Log.d("ProductSyncWorker", "Llamando a getProductUseCase...")
             getProductsUseCase(refreshData = true)
             Log.d("ProductSyncWorker", "getProductsUseCase completed successfully.")
             Result.success()

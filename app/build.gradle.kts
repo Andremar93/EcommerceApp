@@ -28,6 +28,15 @@ android {
     namespace = "com.example.ecommerceapp"
     compileSdk = 35
 
+    signingConfigs {
+        create("release") {
+            storeFile = file("../my-release-key.jks")
+            storePassword = "20827414"
+            keyAlias = "mykey"
+            keyPassword = "20827414"
+        }
+    }
+
     buildFeatures {
         buildConfig = true
         compose = true
@@ -50,8 +59,10 @@ android {
     }
 
     buildTypes {
-        release {
+        getByName("release") {
+            signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = false
+            isShrinkResources = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -105,7 +116,6 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.navigation.compose)
-    implementation(project(":feature:cart"))
 
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)
@@ -127,5 +137,7 @@ dependencies {
     implementation(libs.androidx.room.ktx)
 
     implementation(libs.cloudinary.android)
+
+    implementation(libs.androidx.core.splashscreen)
 
 }

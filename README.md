@@ -4,8 +4,11 @@ Aplicación de ecommerce desarrollada con **Kotlin**, **Jetpack Compose**, **MVV
 
 
 ## 🔔 NOTAS: 
-    La aplicación llama directamente al backend harcodeado porque hice modificaciones para que
-    los productos tuviesen categorias. 
+    Es necesiario tener corriendo el backend de la API para que la app funcione correctamente.
+    Este es la url a la API: https://peya-backend.onrender.com/
+    El backend se encuentra en el siguiente repositorio: https://github.com/Andremar93/peya-backend
+
+    El backend es diferente al que nos provieron en el curso, agregue más funcionalidades y lo adapte a la app.
 
     Se puede hacer Login con el usario: test@demo.com , password: RGVtbzEyMyE=
 
@@ -16,14 +19,12 @@ Aplicación de ecommerce desarrollada con **Kotlin**, **Jetpack Compose**, **MVV
 - Registro e inicio de sesión de usuarios (Se guardan en la base de datos, simple. NO encripta el password)
 - Carga de productos (Desde el backend)
 - Agregado al carrito (Guarda el carrito en base de datos con ROOM)
-- Listado y detalles de órdenes (Se guardan las ordenes en la base de datos y hay un screen para ver las ordenes)
+- Listado y detalles de órdenes (Se guardan las ordenes en la base de datos,en la API y hay un screen para ver las ordenes)
+- User profile (Se guarda el usuario en la base de datos y en el BACKEND, se puede editar el nombre y apellido)
 
 ## 🧩 Cosas por mejorar o agregar
 - [ ] Mejorar experiencia de usuario con animaciones (transiciones, feedback visual)
-- [ ] Modo oscuro para toda la app
-- [ ] Agregar soporte offline con Room y sincronización automática
 - [ ] Internacionalización: soporte para varios idiomas
-- [ ] Mejorar el manejo de errores y mostrar mensajes claros al usuario
 - [ ] Mejorar todo la interfaz gráfica
 - [ ] y muchas mas... 
 
@@ -31,7 +32,7 @@ Aplicación de ecommerce desarrollada con **Kotlin**, **Jetpack Compose**, **MVV
 
 
 ## 🧪 Tests
-Próximamente...
+  Los test se deben mejorar
 
 ## ⚙️ Cómo correr la app
 

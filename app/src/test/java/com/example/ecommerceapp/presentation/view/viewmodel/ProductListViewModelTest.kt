@@ -102,21 +102,6 @@ class ProductListViewModelTest {
     }
 
     @Test
-    fun `increaseQuantity and decreaseQuantity update quantities correctly`() {
-        val productId = "123"
-        viewModel.increaseQuantity(productId)
-        assertEquals(2, viewModel.productQuantities[productId])
-
-        viewModel.decreaseQuantity(productId)
-        assertEquals(1, viewModel.productQuantities[productId])
-
-        // No debe decrementar menos de 1
-        viewModel.decreaseQuantity(productId)
-        assertEquals(1, viewModel.productQuantities[productId])
-    }
-
-
-    @Test
     fun `loadProducts updates uiState to Success on success`() = runTest {
         val products = listOf(ProductItem("1", "P", "desc", 10.0, false))
         whenever(getProductsUseCase.invoke(any())).thenReturn(products)

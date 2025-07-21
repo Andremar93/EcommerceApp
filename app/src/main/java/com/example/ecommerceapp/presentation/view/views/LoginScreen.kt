@@ -1,44 +1,23 @@
 package com.example.ecommerceapp.presentation.view.views
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.ecommerceapp.R
 import com.example.ecommerceapp.presentation.view.viewmodel.LoginViewModel
+import com.example.ecommerceapp.presentation.view.viewmodel.LoginViewModel.LoginError
 
 @Composable
 fun LoginScreen(
@@ -47,12 +26,21 @@ fun LoginScreen(
     onLoginSuccess: () -> Unit
 ) {
     val isLoggedIn = viewModel.isLoggedIn
+    val loginState = viewModel.loginState
+
     var passwordVisible by remember { mutableStateOf(false) }
 
+    val generalError = when (viewModel.error) {
+        is LoginError.InvalidEmail -> stringResource(R.string.error_invalid_email)
+        is LoginError.ShortPassword -> stringResource(R.string.error_short_password)
+        is LoginError.EmptyFields -> stringResource(R.string.error_fields_required)
+        is LoginError.FixErrors -> stringResource(R.string.error_fix_fields)
+        is LoginError.Unknown -> (viewModel.error as LoginError.Unknown).message
+        null -> null
+    }
+
     LaunchedEffect(isLoggedIn) {
-        if (isLoggedIn) {
-            onLoginSuccess()
-        }
+        if (isLoggedIn) onLoginSuccess()
     }
 
     Surface(
@@ -74,7 +62,7 @@ fun LoginScreen(
                 color = MaterialTheme.colorScheme.primary
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             OutlinedTextField(
                 value = viewModel.email,
@@ -89,17 +77,22 @@ fun LoginScreen(
                     focusedBorderColor = MaterialTheme.colorScheme.primary,
                     unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
                     cursorColor = MaterialTheme.colorScheme.primary
-                )
+                ),
+                modifier = Modifier.fillMaxWidth()
             )
+
             viewModel.emailError?.let {
                 Text(
-                    text = it,
+                    text = when (it) {
+                        is LoginError.InvalidEmail -> stringResource(R.string.error_invalid_email)
+                        else -> ""
+                    },
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodySmall
                 )
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             OutlinedTextField(
                 value = viewModel.password,
@@ -112,7 +105,7 @@ fun LoginScreen(
                 trailingIcon = {
                     val icon = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff
                     IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                        Icon(icon, contentDescription = null)
+                        Icon(imageVector = icon, contentDescription = null)
                     }
                 },
                 isError = viewModel.passwordError != null,
@@ -121,64 +114,69 @@ fun LoginScreen(
                     focusedBorderColor = MaterialTheme.colorScheme.primary,
                     unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
                     cursorColor = MaterialTheme.colorScheme.primary
-                )
+                ),
+                modifier = Modifier.fillMaxWidth()
             )
+
             viewModel.passwordError?.let {
                 Text(
-                    text = it,
+                    text = when (it) {
+                        is LoginError.ShortPassword -> stringResource(R.string.error_short_password)
+                        else -> ""
+                    },
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodySmall
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             Button(
                 onClick = { viewModel.onLoginClicked() },
                 enabled = viewModel.isFormValid,
-                shape = MaterialTheme.shapes.medium
+                shape = MaterialTheme.shapes.medium,
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Text(stringResource(R.string.login_button))
             }
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            TextButton(onClick = { navController.navigate("register") }) {
+            TextButton(onClick = {
+                navController.navigate("register")
+            }) {
                 Text(
                     text = stringResource(R.string.login_register_prompt),
                     style = MaterialTheme.typography.labelLarge
                 )
             }
 
-            val state = viewModel.loginState
-            when (state) {
+            Spacer(modifier = Modifier.height(16.dp))
+
+            when (loginState) {
                 is LoginViewModel.LoginState.Loading -> {
-                    Spacer(modifier = Modifier.height(8.dp))
                     CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
                 }
+
                 is LoginViewModel.LoginState.Error -> {
-                    Text(state.message, color = MaterialTheme.colorScheme.error)
+                    Text(loginState.message, color = MaterialTheme.colorScheme.error)
                 }
+
                 is LoginViewModel.LoginState.Success -> {
                     Text(stringResource(R.string.login_success), color = MaterialTheme.colorScheme.primary)
                 }
+
                 else -> {}
+            }
+
+            generalError?.let {
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = it,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
         }
     }
-}
-
-
-
-@Preview(showBackground = true)
-@Composable
-fun LoginScreenPreview() {
-    Text(
-        text = stringResource(R.string.login_title),
-        style = MaterialTheme.typography.headlineLarge,
-        color = MaterialTheme.colorScheme.primary,
-        fontWeight = FontWeight.Bold,
-        letterSpacing = 0.5.sp,
-        maxLines = 1
-    )
 }

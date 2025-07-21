@@ -26,6 +26,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import com.example.ecommerceapp.R
 
 @Composable
 fun ProductFilterBar(
@@ -47,16 +49,11 @@ fun ProductFilterBar(
         OutlinedTextField(
             value = searchQuery,
             onValueChange = onSearchQueryChange,
-            label = {
-                Text(
-                    "Buscar producto...",
-                    style = MaterialTheme.typography.labelMedium
-                )
-            },
+            label = { Text(stringResource(R.string.search_product_hint)) },
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.Search,
-                    contentDescription = "Buscar"
+                    contentDescription = stringResource(R.string.cd_search)
                 )
             },
             singleLine = true,
@@ -76,22 +73,20 @@ fun ProductFilterBar(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Selector de categoría
             Box {
                 FilledTonalButton(
                     onClick = { expandedCat = true },
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Text(
-                        text = "Categoría: $selectedCategory",
+                        text = stringResource(R.string.category_label, selectedCategory.ifEmpty { stringResource(R.string.category_all) }),
                         style = MaterialTheme.typography.labelLarge
                     )
                 }
 
                 DropdownMenu(
                     expanded = expandedCat,
-                    onDismissRequest = { expandedCat = false },
-
+                    onDismissRequest = { expandedCat = false }
                 ) {
                     categories.forEach { category ->
                         DropdownMenuItem(
@@ -110,17 +105,17 @@ fun ProductFilterBar(
                 }
             }
 
-            // Botón de orden
             FilledTonalButton(
                 onClick = { onSortChange(!sortAscending) },
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Text(
-                    text = if (sortAscending) "Precio ↑" else "Precio ↓",
+                    text = if (sortAscending) stringResource(R.string.price_asc) else stringResource(R.string.price_desc),
                     style = MaterialTheme.typography.labelLarge
                 )
             }
         }
     }
 }
+
 

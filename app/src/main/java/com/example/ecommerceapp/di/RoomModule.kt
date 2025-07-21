@@ -23,9 +23,11 @@ object RoomModule {
 
     @Singleton
     @Provides
-    fun provideRoom(@ApplicationContext context: Context) =
-        Room.databaseBuilder(context, AppDatabase::class.java, APP_DATABASE_NAME)
-            .fallbackToDestructiveMigration().build()
+    fun provideRoom(@ApplicationContext context: Context) : AppDatabase {
+        return Room.databaseBuilder(context.applicationContext, AppDatabase::class.java, APP_DATABASE_NAME)
+            .fallbackToDestructiveMigration()
+            .build()
+    }
 
     @Singleton
     @Provides
@@ -44,6 +46,7 @@ object RoomModule {
     fun provideOrderItemDao(db: AppDatabase): OrderItemDao = db.getOrderItemDao()
 
     @Provides
+    @Singleton
     fun provideUserDao(db: AppDatabase): UsersDao = db.getUserDao()
 
 }

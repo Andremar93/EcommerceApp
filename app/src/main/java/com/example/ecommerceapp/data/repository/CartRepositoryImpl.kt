@@ -1,86 +1,64 @@
 package com.example.ecommerceapp.data.repository
 
-import android.util.Log
 import com.example.ecommerceapp.data.local.dao.CartDao
-import com.example.ecommerceapp.data.local.dao.ProductDao
 import com.example.ecommerceapp.data.local.mappers.toDomain
 import com.example.ecommerceapp.data.local.mappers.toEntity
 import com.example.ecommerceapp.domain.model.CartItem
 import com.example.ecommerceapp.domain.model.ProductItem
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 import com.example.ecommerceapp.domain.repository.CartRepository
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.*
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class CartRepositoryImpl @Inject constructor(
     private val cartDao: CartDao,
-    private val productDao: ProductDao
 ) : CartRepository {
 
-    private val scope = CoroutineScope(Dispatchers.IO)
-
-    private val _cartItems: StateFlow<List<CartItem>> by lazy {
-        cartDao.getAllCartItems()
-            .map { cartEntities ->
-                cartEntities.mapNotNull { entity ->
-                    val product = productDao.getProductById(entity.productId)?.toDomain()
-                    product?.let { entity.toDomain(it) }
-                }
+    override val cartItems: Flow<List<CartItem>> =
+        cartDao.getAllCartItemsWithProduct()
+            .onEach { list ->
             }
-            .stateIn(scope = scope, started = SharingStarted.Eagerly, initialValue = emptyList())
-    }
-    override val cartItems: StateFlow<List<CartItem>> get() = _cartItems
+            .map { list -> list.map { it.toDomain() } }
 
 
-    override val cartItemCount: StateFlow<Int> =
+    override val cartItemCount: Flow<Int> =
         cartDao.getCartItemCountFlow()
             .map { it ?: 0 }
-            .stateIn(scope, SharingStarted.WhileSubscribed(5000), 0)
+            .distinctUntilChanged()
 
-    override fun updateQuantity(productItem: ProductItem, quantity: Int) {
-        scope.launch {
-            val exists = cartDao.getCartItemByProductId(productItem.id)
-            if (quantity > 0) {
-                if (exists != null) {
-                    val updated = exists.copy(quantity = quantity)
-                    cartDao.updateCartItem(updated)
-                } else {
-                    cartDao.insertCartItem(CartItem(productItem, quantity).toEntity())
-                }
+    override suspend fun updateQuantity(productItem: ProductItem, quantity: Int) {
+        val existing = cartDao.getCartItemByProductId(productItem.id)
+
+        if (quantity > 0) {
+            if (existing != null) {
+                val updated = existing.copy(quantity = quantity)
+                cartDao.updateCartItem(updated)
             } else {
-                cartDao.deleteByProductId(productItem.id)
+                val entity = CartItem(productItem, quantity).toEntity()
+                cartDao.insertCartItem(entity)
             }
-        }
-    }
-
-    override fun removeFromCart(productItem: ProductItem) {
-        scope.launch {
+        } else {
             cartDao.deleteByProductId(productItem.id)
         }
     }
 
-    override fun clearCart() {
-        scope.launch {
-            cartDao.clearCart()
-        }
+
+    override suspend fun removeFromCart(productItem: ProductItem) {
+        cartDao.deleteByProductId(productItem.id)
     }
 
-    override fun addToCart(productItem: ProductItem, quantity: Int): Boolean {
-        scope.launch {
-            val existingItem = cartDao.getCartItemByProductId(productItem.id)
-            if (existingItem != null) {
-                val updatedItem = existingItem.copy(quantity = existingItem.quantity + quantity)
-                cartDao.updateCartItem(updatedItem)
-                return@launch
-            } else {
-                cartDao.insertCartItem(CartItem(productItem, quantity).toEntity())
-            }
+    override suspend fun clearCart() {
+        cartDao.clearCart()
+    }
+
+    override suspend fun addToCart(productItem: ProductItem, quantity: Int): Boolean {
+        val existingItem = cartDao.getCartItemByProductId(productItem.id)
+        if (existingItem != null) {
+            val updatedItem = existingItem.copy(quantity = existingItem.quantity + quantity)
+            cartDao.updateCartItem(updatedItem)
+        } else {
+            cartDao.insertCartItem(CartItem(productItem, quantity).toEntity())
         }
         return true
     }

@@ -18,10 +18,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
 import com.example.ecommerceapp.R
+import com.example.ecommerceapp.presentation.view.viewmodel.CartViewModel
 
 @Composable
 fun MainLayout(
     navController: NavHostController,
+    cartViewModel: CartViewModel,
     showTopBar: Boolean = true,
     showBottomBar: Boolean = true,
     topBarMessage: String = "",
@@ -33,7 +35,11 @@ fun MainLayout(
         Triple(stringResource(R.string.home_feed), Icons.Filled.Home, "products"),
         Triple(stringResource(R.string.home_cart), Icons.Filled.ShoppingCart, "cart"),
         Triple(stringResource(R.string.home_profile), Icons.Filled.Person, "profile"),
-        Triple(stringResource(R.string.home_orders), Icons.AutoMirrored.Filled.ReceiptLong, "orders"),
+        Triple(
+            stringResource(R.string.home_orders),
+            Icons.AutoMirrored.Filled.ReceiptLong,
+            "orders"
+        ),
         Triple(stringResource(R.string.home_settings), Icons.Filled.Settings, "settings"),
     )
 
@@ -46,7 +52,12 @@ fun MainLayout(
         },
         bottomBar = {
             if (showBottomBar) {
-                BottomNavBar(navigationItems, selectedItem, navController)
+                BottomNavBar(
+                    navigationItems,
+                    selectedItem,
+                    navController,
+                    cartViewModel = cartViewModel,
+                )
             }
         },
     ) { innerPadding ->
@@ -54,31 +65,4 @@ fun MainLayout(
             mainContent()
         }
     }
-
 }
-
-@Preview(showBackground = true)
-@Composable
-fun MainLayoutPreview() {
-
-    val navItems = listOf(
-        Triple("Home", Icons.Filled.Home, "products"),
-        Triple("Cart", Icons.Filled.ShoppingCart, "cart"),
-        Triple("Profile", Icons.Filled.Person, "profile"),
-        Triple("Orders", Icons.Filled.ReceiptLong, "orders"),
-        Triple("Settings", Icons.Filled.Settings, "settings")
-    )
-
-    Scaffold(
-        bottomBar = {
-            BottomNavBar(
-                navigationItems = navItems,
-                selectedItem = "cart",
-                navController = androidx.navigation.compose.rememberNavController(),
-            )
-        }
-    ) {
-        Text("Preview content", modifier = Modifier.padding(it))
-    }
-}
-

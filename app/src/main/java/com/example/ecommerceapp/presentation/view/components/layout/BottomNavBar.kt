@@ -19,8 +19,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.graphics.Color
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.ecommerceapp.presentation.view.viewmodel.CartViewModel
 
 @Composable
@@ -28,8 +26,8 @@ fun BottomNavBar(
     navigationItems: List<Triple<String, ImageVector, String>>,
     selectedItem: String,
     navController: NavHostController,
+    cartViewModel: CartViewModel
 ) {
-    val cartViewModel: CartViewModel = hiltViewModel()
     val cartItemCount by cartViewModel.cartItemCount.collectAsState()
 
     val shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)

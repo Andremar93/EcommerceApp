@@ -36,26 +36,25 @@ import androidx.compose.runtime.setValue
 import com.example.ecommerceapp.presentation.view.components.UIState
 import androidx.compose.ui.res.stringResource
 import com.example.ecommerceapp.R
+import com.example.ecommerceapp.presentation.view.viewmodel.CartViewModel
 
 @Composable
 fun ProductListScreen(
     navController: NavHostController,
+    cartViewModel: CartViewModel
 ) {
-
     val productViewModel: ProductListViewModel = hiltViewModel()
 
     val productQuantities = productViewModel.productQuantities
     val lastAddedProduct by productViewModel.lastAddedProductItem
-
     val state = productViewModel.uiState
     val context = LocalContext.current
     val addingProductId = productViewModel.addingProductId
+    val categories by productViewModel.allCategories.collectAsState()
 
     val searchQuery = productViewModel.searchQuery
     val selectedCategory = productViewModel.selectedCategory
-    var sortAscending by remember { mutableStateOf(productViewModel.currentSortAscending) }
-
-    val categories by productViewModel.allCategories.collectAsState()
+    val sortAscending = productViewModel.currentSortAscending
 
     LaunchedEffect(Unit) {
         productViewModel.loadProducts(refreshData = false)
@@ -75,43 +74,45 @@ fun ProductListScreen(
     MainLayout(
         navController = navController,
         selectedItem = "products",
+        cartViewModel = cartViewModel,
         showTopBar = false,
         mainContent = {
-            when (state) {
-                is UIState.Loading -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(50.dp),
-                            color = MaterialTheme.colorScheme.primary,
-                            strokeWidth = 4.dp
-                        )
+            Column(modifier = Modifier.padding(8.dp)) {
+                ProductFilterBar(
+                    searchQuery = searchQuery,
+                    selectedCategory = selectedCategory,
+                    sortAscending = sortAscending,
+                    categories = categories,
+                    onSearchQueryChange = {
+                        productViewModel.filter(it)
+                    },
+                    onCategorySelected = {
+                        productViewModel.filterByCategory(it)
+                    },
+                    onSortChange = {
+                        productViewModel.sortByPrice(it)
                     }
-                }
+                )
 
-                is UIState.Success -> {
-                    val products by productViewModel.filteredProducts
-                    if (products.isEmpty()) {
-                        Column(modifier = Modifier.padding(8.dp)) {
-                            ProductFilterBar(
-                                searchQuery = searchQuery,
-                                selectedCategory = selectedCategory,
-                                sortAscending = sortAscending,
-                                onSearchQueryChange = {
-                                    productViewModel.searchQuery = it
-                                    productViewModel.filter(it)
-                                },
-                                onCategorySelected = {
-                                    productViewModel.selectedCategory = it
-                                    productViewModel.filterByCategory(it)
-                                },
-                                onSortChange = {
-                                    sortAscending = it
-                                    productViewModel.sortByPrice(it)
-                                },
-                                categories = categories,
+                Spacer(modifier = Modifier.height(8.dp))
+
+                when (state) {
+                    is UIState.Loading -> {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(50.dp),
+                                color = MaterialTheme.colorScheme.primary,
+                                strokeWidth = 4.dp
                             )
+                        }
+                    }
 
-                            Spacer(modifier = Modifier.height(8.dp))
+                    is UIState.Success -> {
+                        val products by productViewModel.filteredProducts
+                        if (products.isEmpty()) {
                             Box(
                                 modifier = Modifier.fillMaxSize(),
                                 contentAlignment = Alignment.Center
@@ -121,31 +122,7 @@ fun ProductListScreen(
                                     style = MaterialTheme.typography.bodyLarge
                                 )
                             }
-                        }
-
-                    } else {
-                        Column(modifier = Modifier.padding(8.dp)) {
-                            ProductFilterBar(
-                                searchQuery = searchQuery,
-                                selectedCategory = selectedCategory,
-                                sortAscending = sortAscending,
-                                onSearchQueryChange = {
-                                    productViewModel.searchQuery = it
-                                    productViewModel.filter(it)
-                                },
-                                onCategorySelected = {
-                                    productViewModel.selectedCategory = it
-                                    productViewModel.filterByCategory(it)
-                                },
-                                onSortChange = {
-                                    sortAscending = it
-                                    productViewModel.sortByPrice(it)
-                                },
-                                categories = categories,
-                            )
-
-                            Spacer(modifier = Modifier.height(8.dp))
-
+                        } else {
                             ProductGridContent(
                                 productItems = products,
                                 productQuantities = productQuantities,
@@ -159,20 +136,22 @@ fun ProductListScreen(
                             )
                         }
                     }
-                }
-                is UIState.Error -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(
-                            text = state.message,
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.error
-                        )
+
+                    is UIState.Error -> {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Text(
+                                text = state.message,
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
                     }
                 }
             }
         }
     )
 }
+
 
 
 @Composable

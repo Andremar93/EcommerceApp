@@ -1,9 +1,11 @@
 package com.example.ecommerceapp.presentation.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.ecommerceapp.presentation.view.viewmodel.CartViewModel
 import com.example.ecommerceapp.presentation.view.views.CartScreen
 import com.example.ecommerceapp.presentation.view.views.LoginScreen
 import com.example.ecommerceapp.presentation.view.views.OrdersScreen
@@ -27,8 +29,7 @@ object Routes {
 
 @Composable
 fun AppNavigation(navController: NavHostController) {
-
-
+    val cartViewModel: CartViewModel = hiltViewModel()
     NavHost(navController = navController, startDestination = Routes.SPLASH) {
 
         composable(Routes.SPLASH) {
@@ -57,33 +58,30 @@ fun AppNavigation(navController: NavHostController) {
         }
 
         composable(Routes.PRODUCTS) {
-            ProductListScreen(navController = navController)
+            ProductListScreen(navController = navController, cartViewModel = cartViewModel)
         }
 
         composable(Routes.CART) {
             CartScreen(
-                onBack = {
-                    navController.navigate(Routes.PRODUCTS) {
-                        popUpTo(Routes.CART) { inclusive = true }
-                    }
-                }, navController = navController,
+                navController = navController,
                 onCheckoutSuccess = {
                     navController.navigate(Routes.ORDERS) {
                         popUpTo(Routes.CART) { inclusive = true }
                     }
-                })
+                }, cartViewModel = cartViewModel
+            )
         }
 
         composable(Routes.PROFILE) {
-            UserScreen(navController = navController)
+            UserScreen(navController = navController, cartViewModel = cartViewModel)
         }
 
         composable(Routes.SETTINGS) {
-            SettingsScreen(navController = navController)
+            SettingsScreen(navController = navController, cartViewModel = cartViewModel)
         }
 
         composable(Routes.ORDERS) {
-            OrdersScreen(navController = navController)
+            OrdersScreen(navController = navController, cartViewModel = cartViewModel)
         }
 
     }

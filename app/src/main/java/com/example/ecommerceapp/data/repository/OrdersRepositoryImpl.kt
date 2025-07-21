@@ -13,9 +13,6 @@ class OrdersRepositoryImpl(
     private val ordersLocalDataSource: OrdersLocalDataSource
 ) : OrdersRepository {
 
-//    override val orders: Flow<List<OrderItem>> =
-//        orderDao.getAllOrdersWithItems().map { list -> list.map { it.toDomain() } }
-
     override suspend fun createOrder(orderItem: OrderItem, items: List<OrderItemsItem>): OrderItem {
         return try {
 
@@ -35,7 +32,14 @@ class OrdersRepositoryImpl(
 
     override suspend fun getOrders(userId : String): List<OrderItem> {
         return try {
-            ordersRemoteDataSource.getOrders(userId)
+            val remoteOrders = ordersRemoteDataSource.getOrders(userId)
+
+            remoteOrders.forEach { order ->
+                ordersLocalDataSource.createOrder(order)
+            }
+
+            remoteOrders
+
         } catch (e: HttpException) {
             Log.e("OrdersRepository", "Error fetching orders: ${e.message()}")
             throw e

@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.ecommerceapp.domain.model.User
 import com.example.ecommerceapp.domain.use_case.user.RegisterResult
 import com.example.ecommerceapp.domain.use_case.user.RegisterUseCase
+import com.example.ecommerceapp.presentation.view.viewmodel.LoginViewModel.LoginError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -26,10 +27,11 @@ class RegisterViewModel @Inject constructor(
     var confirmPassword by mutableStateOf("")
 
     //    Errores
-    var emailError by mutableStateOf<String?>(null)
-    var passwordError by mutableStateOf<String?>(null)
-    var passwordConfirmationError by mutableStateOf<String?>(null)
-    var generalError by mutableStateOf<String?>(null)
+    var emailError by mutableStateOf<RegisterError?>(null)
+    var passwordError by mutableStateOf<RegisterError?>(null)
+    var passwordConfirmationError by mutableStateOf<RegisterError?>(null)
+    var generalError by mutableStateOf<RegisterError?>(null)
+
 
     var isSuccess by mutableStateOf(false)
 
@@ -55,7 +57,7 @@ class RegisterViewModel @Inject constructor(
         validateFields()
 
         if (!isFormValid) {
-            generalError = "Corrige los errores antes de continuar"
+            generalError = RegisterError.FixFields
             return
         }
 
@@ -80,7 +82,6 @@ class RegisterViewModel @Inject constructor(
 
                 is RegisterResult.Error -> {
                     registerState = RegisterState.Error(result.message)
-                    generalError = result.message
                 }
             }
         }
@@ -90,22 +91,20 @@ class RegisterViewModel @Inject constructor(
     private fun validateFields() {
 
         emailError = when {
-            email.isBlank() -> "El campo email es obligatorio"
-            !Patterns.EMAIL_ADDRESS.matcher(email)
-                .matches() -> "El email no tiene un formato válido"
-
+            email.isBlank() -> RegisterError.EmailRequired
+            !Patterns.EMAIL_ADDRESS.matcher(email).matches() -> RegisterError.InvalidEmail
             else -> null
         }
 
         passwordError = when {
-            password.isBlank() -> "El campo contraseña es obligatorio"
-            password.length < 8 -> "La contraseña debe tener al menos 8 caracteres"
+            password.isBlank() -> RegisterError.PasswordRequired
+            password.length < 8 -> RegisterError.PasswordTooShort
             else -> null
         }
 
         passwordConfirmationError = when {
-            confirmPassword.isBlank() -> "Debes confirmar tu contraseña"
-            password != confirmPassword -> "Las contraseñas no coinciden"
+            confirmPassword.isBlank() -> RegisterError.PasswordConfirmationRequired
+            password != confirmPassword -> RegisterError.PasswordsDoNotMatch
             else -> null
         }
     }
@@ -125,5 +124,17 @@ class RegisterViewModel @Inject constructor(
         object Success : RegisterState()
         data class Error(val message: String) : RegisterState()
     }
+
+    sealed class RegisterError {
+        object EmailRequired : RegisterError()
+        object InvalidEmail : RegisterError()
+        object PasswordRequired : RegisterError()
+        object PasswordTooShort : RegisterError()
+        object PasswordConfirmationRequired : RegisterError()
+        object PasswordsDoNotMatch : RegisterError()
+        object FixFields : RegisterError()
+        data class General(val message: String) : RegisterError()
+    }
+
 
 }

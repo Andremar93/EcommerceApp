@@ -6,12 +6,14 @@ import androidx.navigation.NavHostController
 import com.example.ecommerceapp.R
 import com.example.ecommerceapp.presentation.view.components.UnderConstructionScreen
 import com.example.ecommerceapp.presentation.view.components.layout.MainLayout
+import com.example.ecommerceapp.presentation.view.viewmodel.CartViewModel
 
 @Composable
-fun SettingsScreen(navController: NavHostController) {
+fun SettingsScreen(navController: NavHostController, cartViewModel: CartViewModel) {
     MainLayout(
         navController = navController,
         selectedItem = "settings",
+        cartViewModel = cartViewModel,
         topBarMessage = stringResource(id = R.string.settings),
         mainContent = {
             UnderConstructionScreen(

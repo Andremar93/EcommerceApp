@@ -23,29 +23,30 @@ class OrderViewModel @Inject constructor(
 ) : ViewModel() {
 
     var uiState by mutableStateOf<UIState<List<OrderItem>>>(UIState.Loading)
+        private set
 
     fun getOrders() {
         viewModelScope.launch {
             uiState = UIState.Loading
-
             try {
-                val user = getActiveUserUseCase.invoke()
-                val orders = getOrdersUseCase.invoke(user.id)
+                val user = getActiveUserUseCase()
+                val orders = getOrdersUseCase(user.id)
                 uiState = UIState.Success(orders)
-
             } catch (e: IOException) {
+                Log.e("OrderViewModel", "No internet", e)
                 uiState = UIState.Error("Sin conexión a Internet")
-                Log.e(
-                    "ProductListViewModel",
-                    "Sin conexión a Internet, error al cargar los productos",
-                    e
-                )
             } catch (e: HttpException) {
-                uiState = UIState.Error("Error al cargar los productos: ${e.message}")
+                Log.e("OrderViewModel", "HTTP error: ${e.code()}", e)
+                if (e.code() == 404) {
+                    // 404 = sin pedidos, lo tratamos como éxito con lista vacía
+                    uiState = UIState.Success(emptyList())
+                } else {
+                    uiState = UIState.Error("Error al cargar pedidos: ${e.message()}")
+                }
             } catch (e: Exception) {
-                uiState = UIState.Error(e.message ?: "Unknown error")
+                Log.e("OrderViewModel", "Unknown error", e)
+                uiState = UIState.Error("Error inesperado: ${e.message ?: "desconocido"}")
             }
-
         }
     }
 }

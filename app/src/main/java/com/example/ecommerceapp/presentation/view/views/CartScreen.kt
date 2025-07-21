@@ -20,7 +20,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.ecommerceapp.presentation.view.viewmodel.CartViewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.foundation.lazy.items
@@ -32,16 +31,15 @@ import com.example.ecommerceapp.presentation.view.components.ProductItemOnCart
 import com.example.ecommerceapp.presentation.view.components.layout.MainLayout
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.sp
 import com.example.ecommerceapp.R
 
 @Composable
 fun CartScreen(
-    onBack: () -> Unit,
     navController: NavHostController,
-    onCheckoutSuccess: () -> Unit
+    onCheckoutSuccess: () -> Unit,
+    cartViewModel: CartViewModel
 ) {
-    val cartViewModel: CartViewModel = hiltViewModel()
     val cartItems by cartViewModel.cartItems.collectAsState()
     val totalProducts by cartViewModel.totalProducts.collectAsState()
     val totalPrice by cartViewModel.totalPrice.collectAsState()
@@ -53,7 +51,8 @@ fun CartScreen(
     MainLayout(
         navController = navController,
         selectedItem = "cart",
-        topBarMessage = stringResource(id = R.string.buy_cart),
+        cartViewModel = cartViewModel,
+        topBarMessage = stringResource(id = R.string.cart_title),
         mainContent = {
             if (totalProducts == 0) {
                 EmptyCartScreen(navController)
@@ -61,7 +60,11 @@ fun CartScreen(
                 Column(
                     Modifier
                         .fillMaxSize()
-                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                        .padding(
+                            start = 10.dp,
+                            end = 10.dp,
+                            bottom = 6.dp
+                        ),
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
                     LazyColumn(
@@ -77,7 +80,7 @@ fun CartScreen(
                                 isDeleting = false,
                                 onDeleteProduct = { cartViewModel.removeFromCart(cartItem.productItem) }
                             )
-                            Spacer(modifier = Modifier.height(10.dp))
+                            Spacer(modifier = Modifier.height(4.dp))
                         }
                     }
 
@@ -106,6 +109,7 @@ fun CartScreen(
                                 text = stringResource(id = R.string.total_products, totalProducts),
                                 style = MaterialTheme.typography.bodyMedium
                             )
+                            Spacer(Modifier.height(5.dp))
                             Text(
                                 text = stringResource(id = R.string.total_price, totalPrice),
                                 style = MaterialTheme.typography.bodyMedium,
@@ -127,7 +131,10 @@ fun CartScreen(
                             modifier = Modifier.weight(1f),
                             shape = MaterialTheme.shapes.medium
                         ) {
-                            Text(text = stringResource(id = R.string.clear_cart))
+                            Text(
+                                text = stringResource(id = R.string.clear_cart),
+                                letterSpacing = 0.1.sp
+                            )
                         }
 
                         Button(

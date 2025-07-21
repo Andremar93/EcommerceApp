@@ -34,11 +34,13 @@ import coil.compose.AsyncImage
 import com.example.ecommerceapp.R
 import com.example.ecommerceapp.domain.model.User
 import com.example.ecommerceapp.presentation.view.components.layout.MainLayout
+import com.example.ecommerceapp.presentation.view.viewmodel.CartViewModel
 import com.example.ecommerceapp.presentation.view.viewmodel.UserViewModel
 
 @Composable
 fun UserScreen(
-    navController: NavHostController
+    navController: NavHostController,
+    cartViewModel: CartViewModel
 ) {
     val userViewModel: UserViewModel = hiltViewModel()
 
@@ -46,6 +48,7 @@ fun UserScreen(
         navController = navController,
         topBarMessage = stringResource(id = R.string.user_profile_title),
         selectedItem = "profile",
+        cartViewModel = cartViewModel,
         mainContent = {
             UserScreenContent(
                 userViewModel = userViewModel,
@@ -82,11 +85,6 @@ fun UserScreenContent(
             launcher.launch("image/*")
         } else {
 
-//            val finalGranted = ContextCompat.checkSelfPermission(context, imagePermission) == PackageManager.PERMISSION_GRANTED
-//            if (finalGranted) {
-//                launcher.launch("image/*")
-//            } else {
-//            }
             Toast.makeText(
                 context,
                 context.getString(R.string.profile_files_permission),

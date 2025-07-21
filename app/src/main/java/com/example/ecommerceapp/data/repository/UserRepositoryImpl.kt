@@ -1,7 +1,6 @@
 package com.example.ecommerceapp.data.repository
 
 import android.util.Log
-import androidx.lifecycle.viewModelScope
 import com.example.ecommerceapp.domain.local.data_source.UsersLocalDataSource
 import com.example.ecommerceapp.domain.model.User
 import com.example.ecommerceapp.domain.remote.data_source.UsersRemoteDataSource

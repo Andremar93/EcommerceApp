@@ -8,9 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.ecommerceapp.domain.repository.CartRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import androidx.compose.runtime.getValue
@@ -30,20 +28,22 @@ class ProductListViewModel @Inject constructor(
 ) : ViewModel() {
 
     var searchQuery by mutableStateOf("")
+        private set
     var selectedCategory by mutableStateOf("Todas")
+        private set
 
     private val _allCategories = MutableStateFlow<List<String>>(emptyList())
     val allCategories: StateFlow<List<String>> = _allCategories
 
     var addingProductId by mutableStateOf<String?>(null)
+        private set
 
     private val _filteredProducts = mutableStateOf<List<ProductItem>>(emptyList())
     val filteredProducts: State<List<ProductItem>> = _filteredProducts
 
     private var allProductItems: List<ProductItem> = emptyList()
-    private var currentQuery = ""
-    private var currentCategory: String? = null
-    var currentSortAscending = true
+    var currentSortAscending by mutableStateOf(true)
+        private set
 
     private val _productQuantities: SnapshotStateMap<String, Int> = mutableStateMapOf()
     val productQuantities: Map<String, Int> get() = _productQuantities
@@ -52,34 +52,26 @@ class ProductListViewModel @Inject constructor(
     val lastAddedProductItem: State<ProductItem?> = _lastAddedProductItem
 
     var uiState by mutableStateOf<UIState<List<ProductItem>>>(UIState.Loading)
+        private set
 
     fun loadProducts(refreshData: Boolean) {
+
         viewModelScope.launch {
             uiState = UIState.Loading
             try {
-
                 val products = getProductsUseCase.invoke(refreshData)
                 allProductItems = products
-
-                _allCategories.value =
-                    listOf("Todas") + allProductItems.flatMap { it.categories }.distinct()
-
+                _allCategories.value = listOf("Todas") + allProductItems.flatMap { it.categories }.distinct()
                 applyFilters()
                 uiState = UIState.Success(products)
-
-
             } catch (e: IOException) {
                 uiState = UIState.Error("Sin conexión a Internet")
-                Log.e(
-                    "ProductListViewModel",
-                    "Sin conexión a Internet, error al cargar los productos",
-                    e
-                )
+                Log.e("ProductListViewModel", "Sin conexión a Internet, error al cargar productos", e)
             } catch (e: HttpException) {
-                uiState = UIState.Error("Error al cargar los productos: ${e.message}")
+                uiState = UIState.Error("Error al cargar productos: ${e.message()}")
             } catch (e: Exception) {
                 uiState = UIState.Error("Error inesperado: ${e.message ?: "Desconocido"}")
-                Log.e("ProductListViewModel", "Error inesperado al cargar los productos", e)
+                Log.e("ProductListViewModel", "Error inesperado al cargar productos", e)
             }
         }
     }
@@ -87,19 +79,21 @@ class ProductListViewModel @Inject constructor(
     fun addToCart(productItem: ProductItem, quantity: Int) {
         viewModelScope.launch {
             addingProductId = productItem.id
-            if (addToCartUseCase.invoke(productItem, quantity)) {
+            val success = addToCartUseCase.invoke(productItem, quantity)
+            if (success) {
                 _lastAddedProductItem.value = productItem
             }
+            addingProductId = null // limpiar el estado para UI
         }
     }
 
     fun filter(query: String) {
-        currentQuery = query
+        searchQuery = query
         applyFilters()
     }
 
     fun filterByCategory(category: String) {
-        currentCategory = category
+        selectedCategory = category
         applyFilters()
     }
 
@@ -108,26 +102,21 @@ class ProductListViewModel @Inject constructor(
         applyFilters()
     }
 
-    fun applyFilters() {
+    private fun applyFilters() {
         var result = allProductItems
-        if (currentQuery.isNotBlank()) {
+
+        if (searchQuery.isNotBlank()) {
             result = result.filter { prod ->
-                val matchesText = prod.name.contains(currentQuery, ignoreCase = true)
-                        || prod.description.contains(currentQuery, ignoreCase = true)
-                        || prod.categories.any { cat ->
-                    cat.contains(currentQuery, ignoreCase = true)
-                }
-                matchesText
+                prod.name.contains(searchQuery, ignoreCase = true) ||
+                        prod.description.contains(searchQuery, ignoreCase = true) ||
+                        prod.categories.any { cat -> cat.contains(searchQuery, ignoreCase = true) }
             }
         }
 
-        currentCategory?.let { cat ->
-            if (cat != "Todas") {
-                result = result.filter { prod ->
-                    val matchesCat = prod.categories.any { category ->
-                        category.equals(cat, ignoreCase = true)
-                    }
-                    matchesCat
+        if (selectedCategory != "Todas") {
+            result = result.filter { prod ->
+                prod.categories.any { category ->
+                    category.equals(selectedCategory, ignoreCase = true)
                 }
             }
         }
@@ -142,7 +131,7 @@ class ProductListViewModel @Inject constructor(
     }
 
     fun increaseQuantity(productId: String) {
-        val current = _productQuantities[productId] ?: 1
+        val current = _productQuantities[productId] ?: 0
         _productQuantities[productId] = current + 1
     }
 
@@ -156,5 +145,4 @@ class ProductListViewModel @Inject constructor(
     fun resetLastAddedProduct() {
         _lastAddedProductItem.value = null
     }
-
 }

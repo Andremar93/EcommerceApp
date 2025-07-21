@@ -1,6 +1,7 @@
 package com.example.ecommerceapp.presentation.view.viewmodel
 
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
@@ -13,6 +14,7 @@ import com.example.ecommerceapp.domain.model.ProductItem
 import com.example.ecommerceapp.domain.use_case.order.CreateOrderUseCase
 import com.example.ecommerceapp.domain.use_case.user.GetActiveUserUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.collections.sumOf
@@ -38,13 +40,23 @@ class CartViewModel @Inject constructor(
         cartRepository.cartItems
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+
+    var checkoutSuccess by mutableStateOf(false)
+        private set
+
+    var isCheckingOut by mutableStateOf(false)
+        private set
+
+    var checkoutStep by mutableIntStateOf(0)
+        private set
+
     private val _totalProducts = MutableStateFlow(0)
     val totalProducts: StateFlow<Int> = _totalProducts
 
     private val _totalPrice = MutableStateFlow(0.0)
     val totalPrice: StateFlow<Double> = _totalPrice
 
-    var checkoutSuccess by mutableStateOf(false)
+//    var checkoutSuccess by mutableStateOf(false)
 
     fun loadCart() {
         viewModelScope.launch {
@@ -57,7 +69,8 @@ class CartViewModel @Inject constructor(
 
     fun increaseQuantity(productItem: ProductItem) {
         viewModelScope.launch {
-            val existing = cartRepository.cartItems.firstOrNull()?.find { it.productItem.id == productItem.id }
+            val existing =
+                cartRepository.cartItems.firstOrNull()?.find { it.productItem.id == productItem.id }
             val newQuantity = (existing?.quantity ?: 0) + 1
             cartRepository.updateQuantity(productItem, newQuantity)
         }
@@ -65,7 +78,8 @@ class CartViewModel @Inject constructor(
 
     fun decreaseQuantity(productItem: ProductItem) {
         viewModelScope.launch {
-            val existing = cartRepository.cartItems.firstOrNull()?.find { it.productItem.id == productItem.id }
+            val existing =
+                cartRepository.cartItems.firstOrNull()?.find { it.productItem.id == productItem.id }
             val newQuantity = (existing?.quantity ?: 0) - 1
             cartRepository.updateQuantity(productItem, newQuantity)
         }
@@ -87,6 +101,21 @@ class CartViewModel @Inject constructor(
         viewModelScope.launch {
             val items = cartItems.value
             if (items.isEmpty()) return@launch
+
+            // Iniciar loader
+            isCheckingOut = true
+            checkoutStep = 0
+            checkoutSuccess = false
+
+            val stepsCount = 4
+            val delayPerStep = 2000L // 2 segundos por paso
+
+            while (checkoutStep < stepsCount - 1) {
+                delay(delayPerStep)
+                checkoutStep++
+            }
+
+
             val generatedOrderId = UUID.randomUUID().toString()
             val orderItems = items.map { cartItem ->
                 OrderItemsItem(
@@ -116,6 +145,11 @@ class CartViewModel @Inject constructor(
 
             createOrderUseCase.invoke(order, orderItems)
             clearCart()
+
+            // Finalizar loader
+            checkoutStep = stepsCount - 1
+            delay(1500)
+            isCheckingOut = false
             checkoutSuccess = true
         }
     }

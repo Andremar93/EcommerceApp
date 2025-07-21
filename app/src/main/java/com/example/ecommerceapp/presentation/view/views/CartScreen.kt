@@ -1,6 +1,5 @@
 package com.example.ecommerceapp.presentation.view.views
 
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,6 +32,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.example.ecommerceapp.R
+import com.example.ecommerceapp.presentation.view.components.CheckoutLoader
 
 @Composable
 fun CartScreen(
@@ -43,113 +43,124 @@ fun CartScreen(
     val cartItems by cartViewModel.cartItems.collectAsState()
     val totalProducts by cartViewModel.totalProducts.collectAsState()
     val totalPrice by cartViewModel.totalPrice.collectAsState()
+
     val checkoutSuccess = cartViewModel.checkoutSuccess
+    val isCheckingOut = cartViewModel.isCheckingOut
+    val checkoutStep = cartViewModel.checkoutStep
+
 
     LaunchedEffect(Unit) { cartViewModel.loadCart() }
     LaunchedEffect(checkoutSuccess) { if (checkoutSuccess) onCheckoutSuccess() }
 
-    MainLayout(
-        navController = navController,
-        selectedItem = "cart",
-        cartViewModel = cartViewModel,
-        topBarMessage = stringResource(id = R.string.cart_title),
-        mainContent = {
-            if (totalProducts == 0) {
-                EmptyCartScreen(navController)
-            } else {
-                Column(
-                    Modifier
-                        .fillMaxSize()
-                        .padding(
-                            start = 10.dp,
-                            end = 10.dp,
-                            bottom = 6.dp
-                        ),
-                    verticalArrangement = Arrangement.SpaceBetween
-                ) {
-                    LazyColumn(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
-                    ) {
-                        items(cartItems) { cartItem ->
-                            ProductItemOnCart(
-                                cartItem = cartItem,
-                                onIncrease = { cartViewModel.increaseQuantity(cartItem.productItem) },
-                                onDecrease = { cartViewModel.decreaseQuantity(cartItem.productItem) },
-                                isDeleting = false,
-                                onDeleteProduct = { cartViewModel.removeFromCart(cartItem.productItem) }
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
+        MainLayout(
+            navController = navController,
+            selectedItem = "cart",
+            cartViewModel = cartViewModel,
+            topBarMessage = stringResource(id = R.string.cart_title),
+            mainContent = {
+                Box(modifier = Modifier.fillMaxSize()) {
+
+                    if (totalProducts == 0) {
+                        EmptyCartScreen(navController)
+                    } else {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(
+                                    start = 10.dp,
+                                    end = 10.dp,
+                                    bottom = 6.dp
+                                ),
+                            verticalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            LazyColumn(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxWidth()
+                            ) {
+                                items(cartItems) { cartItem ->
+                                    ProductItemOnCart(
+                                        cartItem = cartItem,
+                                        onIncrease = { cartViewModel.increaseQuantity(cartItem.productItem) },
+                                        onDecrease = { cartViewModel.decreaseQuantity(cartItem.productItem) },
+                                        isDeleting = false,
+                                        onDeleteProduct = { cartViewModel.removeFromCart(cartItem.productItem) }
+                                    )
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 4.dp),
+                                elevation = CardDefaults.cardElevation(4.dp),
+                                shape = MaterialTheme.shapes.medium,
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                                    contentColor = MaterialTheme.colorScheme.onSurface
+                                )
+                            ) {
+                                Column(Modifier.padding(16.dp)) {
+                                    Text(
+                                        text = stringResource(id = R.string.cart_summary_title),
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Medium,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                    Spacer(Modifier.height(10.dp))
+                                    Text(
+                                        text = stringResource(id = R.string.total_products, totalProducts),
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                    Spacer(Modifier.height(5.dp))
+                                    Text(
+                                        text = stringResource(id = R.string.total_price, totalPrice),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 12.dp),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                FilledTonalButton(
+                                    onClick = { cartViewModel.clearCart() },
+                                    modifier = Modifier.weight(1f),
+                                    shape = MaterialTheme.shapes.medium
+                                ) {
+                                    Text(
+                                        text = stringResource(id = R.string.clear_cart),
+                                        letterSpacing = 0.1.sp
+                                    )
+                                }
+
+                                Button(
+                                    onClick = { cartViewModel.finalizeOrder() },
+                                    modifier = Modifier.weight(1f),
+                                    shape = MaterialTheme.shapes.medium
+                                ) {
+                                    Text(text = stringResource(id = R.string.buy_cart))
+                                }
+                            }
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 4.dp),
-                        elevation = CardDefaults.cardElevation(4.dp),
-                        shape = MaterialTheme.shapes.medium,
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-                            contentColor = MaterialTheme.colorScheme.onSurface
-                        )
-                    ) {
-                        Column(Modifier.padding(16.dp)) {
-                            Text(
-                                text = stringResource(id = R.string.cart_summary_title),
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Medium,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                            Spacer(Modifier.height(10.dp))
-                            Text(
-                                text = stringResource(id = R.string.total_products, totalProducts),
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                            Spacer(Modifier.height(5.dp))
-                            Text(
-                                text = stringResource(id = R.string.total_price, totalPrice),
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 12.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        FilledTonalButton(
-                            onClick = { cartViewModel.clearCart() },
-                            modifier = Modifier.weight(1f),
-                            shape = MaterialTheme.shapes.medium
-                        ) {
-                            Text(
-                                text = stringResource(id = R.string.clear_cart),
-                                letterSpacing = 0.1.sp
-                            )
-                        }
-
-                        Button(
-                            onClick = { cartViewModel.finalizeOrder() },
-                            modifier = Modifier.weight(1f),
-                            shape = MaterialTheme.shapes.medium
-                        ) {
-                            Text(text = stringResource(id = R.string.buy_cart))
-                        }
+                    if (isCheckingOut) {
+                        CheckoutLoader(step = checkoutStep)
                     }
                 }
             }
-        }
-    )
-}
+        )
+    }
 
 @Composable
 fun EmptyCartScreen(navController: NavHostController) {

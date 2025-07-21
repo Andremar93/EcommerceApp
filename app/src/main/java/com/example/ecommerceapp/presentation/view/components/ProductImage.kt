@@ -1,17 +1,21 @@
 package com.example.ecommerceapp.presentation.view.components
 
+import android.graphics.BitmapFactory
+import android.util.Base64
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -23,25 +27,62 @@ import coil.request.ImageRequest
 import com.example.ecommerceapp.R
 
 @Composable
-fun ProductImage(imageUrl: String, hasDrink: Boolean, name: String) {
+fun ProductImage(
+    imageUrl: String,
+    hasDrink: Boolean,
+    name: String
+) {
+    val isBase64 = imageUrl.startsWith("data:image")
+
     Box(
         modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.Center
     ) {
-        AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(imageUrl)
-                .crossfade(true)
-                .build(),
-            placeholder = painterResource(id = R.drawable.ic_placeholder),
-            error = painterResource(id = R.drawable.ic_placeholder),
-            contentDescription = name,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(110.dp)
-                .clip(RoundedCornerShape(12.dp))
-        )
+        if (isBase64) {
+            // Decodifica Base64 y muestra con Image
+            val base64Data = imageUrl.substringAfter(",")
+            val imageBytes = Base64.decode(base64Data, Base64.DEFAULT)
+            val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+
+            bitmap?.let {
+                Image(
+                    bitmap = it.asImageBitmap(),
+                    contentDescription = name,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(110.dp)
+                        .clip(RoundedCornerShape(12.dp)),
+                    contentScale = ContentScale.Crop
+                )
+            } ?: run {
+                // Muestra placeholder si falla la decodificación
+                androidx.compose.foundation.Image(
+                    painter = painterResource(id = R.drawable.ic_placeholder),
+                    contentDescription = "placeholder",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(110.dp)
+                        .clip(RoundedCornerShape(12.dp)),
+                    contentScale = ContentScale.Crop
+                )
+            }
+        } else {
+            // URL normal, carga con Coil AsyncImage
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(imageUrl)
+                    .crossfade(true)
+                    .build(),
+                placeholder = painterResource(id = R.drawable.ic_placeholder),
+                error = painterResource(id = R.drawable.ic_placeholder),
+                contentDescription = name,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(110.dp)
+                    .clip(RoundedCornerShape(12.dp))
+            )
+        }
 
         if (hasDrink) {
             Surface(
@@ -61,3 +102,4 @@ fun ProductImage(imageUrl: String, hasDrink: Boolean, name: String) {
         }
     }
 }
+
